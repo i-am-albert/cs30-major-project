@@ -5,6 +5,8 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+
+
 // constants
 let MODULE_SIZE = 64;
 
@@ -30,8 +32,11 @@ class Module {
     this.y=posy;
   }
   display() {
+    push();
+    translate(width/2,height/2);
     rotate(shipRotation);
-    image(moduleImages.heart_hub,width/2+this.x*MODULE_SIZE,height/2+this.x*MODULE_SIZE,this.x*MODULE_SIZE+MODULE_SIZE,this.x*MODULE_SIZE+MODULE_SIZE);
+    image(moduleImages.heart_hub,this.x*MODULE_SIZE-MODULE_SIZE/2,this.x*MODULE_SIZE-MODULE_SIZE/2,MODULE_SIZE,MODULE_SIZE);
+    pop();
   }
 }
 
@@ -69,8 +74,10 @@ function displayModules() {
 }
 
 function setup() {
+  rectMode(CENTER);
   createCanvas(windowWidth, windowHeight);
-  moduleArray.push(new Module(0,0,moduleImages.heart_hub));
+  moduleArray.push(new Module(0,0,0,0,moduleImages.heart_hub));
+  moduleArray.push(new Module(0,1,0,0,moduleImages.booster));
 }
 
 function draw() {
@@ -88,14 +95,18 @@ function mousePressed() {
   started = true;
 }
 
-function keyPressed() {
-  if (started) {
-    if (key === "a") {
-      shipdr+=0.01;
-    }
-    if (key === "d") {
-      shipdr-=0.01;
-    }
+function shipControls() {
+  if (keyIsDown("w")) {
+
+  }
+  if (keyIsDown("a")) {
+
+  }
+  if (keyIsDown("s")) {
+
+  }
+  if (keyIsDown("d")) {
+
   }
 }
 
