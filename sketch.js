@@ -5,10 +5,19 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+// will add ship connections with constraints
 
+// Matter.js variables
+let engine;
+let world;
+let shipBody;
+
+let draggedModule;
 
 // constants
-let MODULE_SIZE = 64;
+const MODULE_SIZE = 64;
+const FORCE = 0.001;
+const TORQUE = 0.001;
 
 // image variables
 let moduleImages;
@@ -17,26 +26,23 @@ let planetImages;
 // state variables
 let started = false;
 
-// player variables
-let shipx;
-let shipy;
-let shipdx = 0;
-let shipdy = 0;
-let shipRotation = 0;
-let shipdr = 0;
-
 class Module {
-  constructor(posx,posy,posx2,posy2,type) {
-    this.type=type;
-    this.x=posx;
-    this.y=posy;
+  constructor(posx, posy, posx2, posy2, type) {
+    this.type = type;
+    this.body = Matter.Bodies.rectangle(posx*MODULE_SIZE, posy*MODULE_SIZE, MODULE_SIZE, MODULE_SIZE, {frictionAir: 0.0});
+    Matter.World.add(world, this.body);
   }
+
   display() {
     push();
-    translate(width/2,height/2);
-    rotate(shipRotation);
-    image(moduleImages.heart_hub,this.x*MODULE_SIZE-MODULE_SIZE/2,this.x*MODULE_SIZE-MODULE_SIZE/2,MODULE_SIZE,MODULE_SIZE);
+    translate(this.body.position.x, this.body.position.y);
+    rotate(this.body.angle);
+    image(this.type, -MODULE_SIZE/2, -MODULE_SIZE/2, MODULE_SIZE, MODULE_SIZE);
     pop();
+  }
+
+  containsPoint(x, y) {
+    return Matter.Bounds.contains(this.body.bounds, {x:x, y:y});
   }
 }
 
@@ -68,50 +74,101 @@ function displayStartScreen() {
 
 function displayModules() {
   for (let module of moduleArray) {
-    // module.move();
     module.display(module.type,0,0);
   }
+  
 }
 
 function setup() {
-  rectMode(CENTER);
   createCanvas(windowWidth, windowHeight);
-  moduleArray.push(new Module(0,0,0,0,moduleImages.heart_hub));
-  moduleArray.push(new Module(0,1,0,0,moduleImages.booster));
+
+  engine = Matter.Engine.create();
+  world = engine.world;
+  engine.gravity.x = 0;
+  engine.gravity.y = 0;
+
+  shipBody = Matter.Bodies.rectangle(width / 2, height / 2, MODULE_SIZE, MODULE_SIZE, {frictionAir: 0.0});
+  Matter.World.add(world, shipBody);
+  earthBody = Matter.Bodies.circle(width / 2, height / 2 - 200, 150, {isStatic: true});
+  Matter.World.add(world, earthBody);
+
+  // example test modules
+  moduleArray.push(new Module(0, 0, 0, 0, moduleImages.booster));
+  moduleArray.push(new Module(1, 1, 0, 0, moduleImages.cargo));
+  moduleArray.push(new Module(2, 2, 0, 0, moduleImages.eco_booster));
+  moduleArray.push(new Module(3, 3, 0, 0, moduleImages.hub_booster));
+  moduleArray.push(new Module(4, 4, 0, 0, moduleImages.hub));
+  moduleArray.push(new Module(5, 5, 0, 0, moduleImages.landing_booster));
+  moduleArray.push(new Module(6, 6, 0, 0, moduleImages.landing_gear));
+  moduleArray.push(new Module(7, 7, 0, 0, moduleImages.power_hub));
+  moduleArray.push(new Module(8, 8, 0, 0, moduleImages.solar_panel));
+  moduleArray.push(new Module(9, 9, 0, 0, moduleImages.super_booster));
 }
 
 function draw() {
   background(0);
+  Matter.Engine.update(engine);
+  translate(width / 2 - shipBody.position.x, height / 2 - shipBody.position.y);
+
+  push();
+  translate(shipBody.position.x, shipBody.position.y);
+  rotate(shipBody.angle);
+  image(moduleImages.heart_hub, -MODULE_SIZE / 2, -MODULE_SIZE / 2, MODULE_SIZE, MODULE_SIZE);
+  pop();
+
+  push();
+  translate(earthBody.position.x, earthBody.position.y);
+  image(planetImages.earth, -150, -150, 300, 300);
+  pop();
+
   if (started) {
     displayModules();
-    shipMovement();
-  }
-  else if (!started) {
+    shipControls();
+  } else {
     displayStartScreen();
   }
 }
 
 function mousePressed() {
-  started = true;
+  if (!started) {
+    started = true;
+  }
+
+  for (let module of moduleArray) {
+    if (module.containsPoint((mouseX - (width/2 - shipBody.position.x)), (mouseY - (height/2 - shipBody.position.y)))) {
+      draggedModule = module;
+    }
+  }
+}
+
+function mouseDragged() {
+  if (draggedModule) {
+    Matter.Body.setPosition(draggedModule.body, {
+      x: mouseX - (width/2 - shipBody.position.x),
+      y: mouseY - (height/2 - shipBody.position.y)
+    });
+  }
+}
+
+function mouseReleased() {
+  draggedModule = null;
 }
 
 function shipControls() {
-  if (keyIsDown("w")) {
-
+  // W
+  if (keyIsDown(87)) {
+    Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - PI/2), y: FORCE*Math.sin(shipBody.angle - PI/2) });
   }
-  if (keyIsDown("a")) {
-
+  // A
+  if (keyIsDown(65)) {
+    Matter.Body.setAngularVelocity(shipBody, shipBody.angularVelocity - TORQUE);
   }
-  if (keyIsDown("s")) {
-
+  // S
+  if (keyIsDown(83)) {
+    Matter.Body.applyForce(shipBody, shipBody.position, { x: -FORCE*Math.cos(shipBody.angle - PI/2), y: -FORCE*Math.sin(shipBody.angle - PI/2) });
   }
-  if (keyIsDown("d")) {
-
+  // D
+  if (keyIsDown(68)) {
+    Matter.Body.setAngularVelocity(shipBody, shipBody.angularVelocity + TORQUE);
   }
-}
-
-function shipMovement() {
-  shipx+=shipdx;
-  shipy+=shipdy;
-  shipRotation+=shipdr;
 }
