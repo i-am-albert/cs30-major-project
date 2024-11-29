@@ -44,6 +44,10 @@ class Module {
   containsPoint(x, y) {
     return Matter.Bounds.contains(this.body.bounds, {x:x, y:y});
   }
+
+  addConstraint(body2) {
+    // Matter.Constraint.create(pointA: (this.body.position.x, this.body.position.y), pointB: (body2.position.x,body2.position.y}));
+  }
 }
 
 let moduleArray = [];
@@ -73,6 +77,19 @@ function displayStartScreen() {
 }
 
 function displayModules() {
+  Matter.Engine.update(engine);
+  translate(width / 2 - shipBody.position.x, height / 2 - shipBody.position.y);
+
+  push();
+  translate(shipBody.position.x, shipBody.position.y);
+  rotate(shipBody.angle);
+  image(moduleImages.heart_hub, -MODULE_SIZE / 2, -MODULE_SIZE / 2, MODULE_SIZE, MODULE_SIZE);
+  pop();
+
+  push();
+  translate(earthBody.position.x, earthBody.position.y);
+  image(planetImages.earth, -150, -150, 300, 300);
+  pop();
   for (let module of moduleArray) {
     module.display(module.type,0,0);
   }
@@ -86,6 +103,8 @@ function setup() {
   world = engine.world;
   engine.gravity.x = 0;
   engine.gravity.y = 0;
+  Composite = Matter.Composite,
+  Constraint = Matter.Constraint,
 
   shipBody = Matter.Bodies.rectangle(width / 2, height / 2, MODULE_SIZE, MODULE_SIZE, {frictionAir: 0.0});
   Matter.World.add(world, shipBody);
@@ -107,19 +126,6 @@ function setup() {
 
 function draw() {
   background(0);
-  Matter.Engine.update(engine);
-  translate(width / 2 - shipBody.position.x, height / 2 - shipBody.position.y);
-
-  push();
-  translate(shipBody.position.x, shipBody.position.y);
-  rotate(shipBody.angle);
-  image(moduleImages.heart_hub, -MODULE_SIZE / 2, -MODULE_SIZE / 2, MODULE_SIZE, MODULE_SIZE);
-  pop();
-
-  push();
-  translate(earthBody.position.x, earthBody.position.y);
-  image(planetImages.earth, -150, -150, 300, 300);
-  pop();
 
   if (started) {
     displayModules();
@@ -157,7 +163,7 @@ function mouseReleased() {
 function shipControls() {
   // W
   if (keyIsDown(87)) {
-    Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - PI/2), y: FORCE*Math.sin(shipBody.angle - PI/2) });
+    Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - PI/2), y: FORCE*Math.sin(shipBody.angle - PI/2)});
   }
   // A
   if (keyIsDown(65)) {
@@ -165,7 +171,7 @@ function shipControls() {
   }
   // S
   if (keyIsDown(83)) {
-    Matter.Body.applyForce(shipBody, shipBody.position, { x: -FORCE*Math.cos(shipBody.angle - PI/2), y: -FORCE*Math.sin(shipBody.angle - PI/2) });
+    Matter.Body.applyForce(shipBody, shipBody.position, {x: -FORCE*Math.cos(shipBody.angle - PI/2), y: -FORCE*Math.sin(shipBody.angle - PI/2)});
   }
   // D
   if (keyIsDown(68)) {
