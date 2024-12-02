@@ -44,10 +44,6 @@ class Module {
   containsPoint(x, y) {
     return Matter.Bounds.contains(this.body.bounds, {x:x, y:y});
   }
-
-  addConstraint(body2) {
-    // Matter.Constraint.create(pointA: (this.body.position.x, this.body.position.y), pointB: (body2.position.x,body2.position.y}));
-  }
 }
 
 let moduleArray = [];
@@ -113,15 +109,24 @@ function setup() {
 
   // example test modules
   moduleArray.push(new Module(0, 0, 0, 0, moduleImages.booster));
-  moduleArray.push(new Module(1, 1, 0, 0, moduleImages.cargo));
+  moduleArray.push(new Module(1, 0, 0, 0, moduleImages.cargo));
   moduleArray.push(new Module(2, 2, 0, 0, moduleImages.eco_booster));
   moduleArray.push(new Module(3, 3, 0, 0, moduleImages.hub_booster));
   moduleArray.push(new Module(4, 4, 0, 0, moduleImages.hub));
   moduleArray.push(new Module(5, 5, 0, 0, moduleImages.landing_booster));
-  moduleArray.push(new Module(6, 6, 0, 0, moduleImages.landing_gear));
-  moduleArray.push(new Module(7, 7, 0, 0, moduleImages.power_hub));
+  moduleArray.push(new Module(10, 10, 0, 0, moduleImages.landing_gear));
+  moduleArray.push(new Module(10, 11, 0, 0, moduleImages.power_hub));
   moduleArray.push(new Module(8, 8, 0, 0, moduleImages.solar_panel));
-  moduleArray.push(new Module(9, 9, 0, 0, moduleImages.super_booster));
+  moduleArray.push(new Module(7, 9, 0, 0, moduleImages.super_booster));
+  let options = {
+    bodyA: moduleArray[6].body,
+    bodyB: moduleArray[7].body,
+    pointA: {x: moduleArray[6].body.position.x, y: moduleArray[6].body.position.y+MODULE_SIZE/2},
+    pointB: {x: moduleArray[7].body.position.x, y: moduleArray[7].body.position.y-MODULE_SIZE/2},
+    stiffness: 1,
+  };
+  constraint = Matter.Constraint.create(options);
+  Matter.World.add(world,constraint);
 }
 
 function draw() {
@@ -130,7 +135,8 @@ function draw() {
   if (started) {
     displayModules();
     shipControls();
-  } else {
+  } 
+  else {
     displayStartScreen();
   }
 }
@@ -141,7 +147,7 @@ function mousePressed() {
   }
 
   for (let module of moduleArray) {
-    if (module.containsPoint((mouseX - (width/2 - shipBody.position.x)), (mouseY - (height/2 - shipBody.position.y)))) {
+    if (module.containsPoint(mouseX - (width/2 - shipBody.position.x), mouseY - (height/2 - shipBody.position.y))) {
       draggedModule = module;
     }
   }
@@ -163,7 +169,7 @@ function mouseReleased() {
 function shipControls() {
   // W
   if (keyIsDown(87)) {
-    Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - PI/2), y: FORCE*Math.sin(shipBody.angle - PI/2)});
+    Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
   }
   // A
   if (keyIsDown(65)) {
