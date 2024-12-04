@@ -115,18 +115,9 @@ function setup() {
   moduleArray.push(new Module(4, 4, 0, 0, moduleImages.hub));
   moduleArray.push(new Module(5, 5, 0, 0, moduleImages.landing_booster));
   moduleArray.push(new Module(10, 10, 0, 0, moduleImages.landing_gear));
-  moduleArray.push(new Module(10, 11, 0, 0, moduleImages.power_hub));
+  moduleArray.push(new Module(9.25, 7, 0, 0, moduleImages.power_hub));
   moduleArray.push(new Module(8, 8, 0, 0, moduleImages.solar_panel));
   moduleArray.push(new Module(7, 9, 0, 0, moduleImages.super_booster));
-  let options = {
-    bodyA: moduleArray[6].body,
-    bodyB: moduleArray[7].body,
-    pointA: {x: moduleArray[6].body.position.x, y: moduleArray[6].body.position.y+MODULE_SIZE/2},
-    pointB: {x: moduleArray[7].body.position.x, y: moduleArray[7].body.position.y-MODULE_SIZE/2},
-    stiffness: 0.1,
-  };
-  constraint = Matter.Constraint.create(options);
-  Matter.World.add(world,constraint);
 }
 
 function draw() {
@@ -159,6 +150,17 @@ function mouseDragged() {
       x: mouseX - (width/2 - shipBody.position.x),
       y: mouseY - (height/2 - shipBody.position.y)
     });
+    if (abs(draggedModule.body.position.x-shipBody.position.x) < MODULE_SIZE && abs(draggedModule.body.position.y-shipBody.position.y) < MODULE_SIZE) {
+      let options = {
+        bodyA: shipBody,
+        bodyB: draggedModule.body,
+        pointA: {x: 1, y: 0},
+        pointB: {x: 1, y: 0},
+        stiffness: 1,
+      };
+      let constraint = Matter.Constraint.create(options);
+      Matter.World.add(world,constraint);
+    }
   }
 }
 
