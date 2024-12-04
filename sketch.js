@@ -123,7 +123,7 @@ function setup() {
     bodyB: moduleArray[7].body,
     pointA: {x: moduleArray[6].body.position.x, y: moduleArray[6].body.position.y+MODULE_SIZE/2},
     pointB: {x: moduleArray[7].body.position.x, y: moduleArray[7].body.position.y-MODULE_SIZE/2},
-    stiffness: 1,
+    stiffness: 0.1,
   };
   constraint = Matter.Constraint.create(options);
   Matter.World.add(world,constraint);
