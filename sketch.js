@@ -74,12 +74,12 @@ function displayStartScreen() {
 
 function displayModules() {
   Matter.Engine.update(engine);
-  translate(width / 2 - shipBody.position.x, height / 2 - shipBody.position.y);
+  translate(width/2 - shipBody.position.x, height/2 - shipBody.position.y);
 
   push();
   translate(shipBody.position.x, shipBody.position.y);
   rotate(shipBody.angle);
-  image(moduleImages.heart_hub, -MODULE_SIZE / 2, -MODULE_SIZE / 2, MODULE_SIZE, MODULE_SIZE);
+  image(moduleImages.heart_hub, -MODULE_SIZE/2, -MODULE_SIZE/2, MODULE_SIZE, MODULE_SIZE);
   pop();
 
   push();
@@ -145,7 +145,7 @@ function mousePressed() {
 }
 
 function mouseDragged() {
-  if (draggedModule) {
+  if (draggedModule && !draggedModule.pickable) {
     Matter.Body.setPosition(draggedModule.body, {
       x: mouseX - (width/2 - shipBody.position.x),
       y: mouseY - (height/2 - shipBody.position.y)
@@ -154,12 +154,13 @@ function mouseDragged() {
       let options = {
         bodyA: shipBody,
         bodyB: draggedModule.body,
-        pointA: {x: 1, y: 0},
-        pointB: {x: 1, y: 0},
+        pointA: {x: 0, y: 0},
+        pointB: {x: 0, y: 0},
         stiffness: 1,
       };
       let constraint = Matter.Constraint.create(options);
       Matter.World.add(world,constraint);
+      draggedModule.picked = true;
     }
   }
 }
