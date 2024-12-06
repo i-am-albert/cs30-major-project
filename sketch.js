@@ -27,7 +27,7 @@ let planetImages;
 let started = false;
 
 class Module {
-  constructor(posx, posy, posx2, posy2, type) {
+  constructor(posx, posy, type) {
     this.type = type;
     this.body = Matter.Bodies.rectangle(posx*MODULE_SIZE, posy*MODULE_SIZE, MODULE_SIZE, MODULE_SIZE, {frictionAir: 0.0});
     Matter.World.add(world, this.body);
@@ -43,6 +43,17 @@ class Module {
 
   containsPoint(x, y) {
     return Matter.Bounds.contains(this.body.bounds, {x:x, y:y});
+  }
+}
+
+class Booster extends Module {
+  constructor(posx, posy, type, thrust) {
+    super(posx, posy, type);
+    this.thrust = thrust;
+  }
+  
+  thrust() {
+    Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
   }
 }
 
@@ -108,16 +119,16 @@ function setup() {
   Matter.World.add(world, earthBody);
 
   // example test modules
-  moduleArray.push(new Module(0, 0, 0, 0, moduleImages.booster));
-  moduleArray.push(new Module(1, 0, 0, 0, moduleImages.cargo));
-  moduleArray.push(new Module(2, 2, 0, 0, moduleImages.eco_booster));
-  moduleArray.push(new Module(3, 3, 0, 0, moduleImages.hub_booster));
-  moduleArray.push(new Module(4, 4, 0, 0, moduleImages.hub));
-  moduleArray.push(new Module(5, 5, 0, 0, moduleImages.landing_booster));
-  moduleArray.push(new Module(10, 10, 0, 0, moduleImages.landing_gear));
-  moduleArray.push(new Module(9.25, 7, 0, 0, moduleImages.power_hub));
-  moduleArray.push(new Module(8, 8, 0, 0, moduleImages.solar_panel));
-  moduleArray.push(new Module(7, 9, 0, 0, moduleImages.super_booster));
+  moduleArray.push(new Booster(0, 0, moduleImages.booster, 1));
+  moduleArray.push(new Module(1, 0, moduleImages.cargo));
+  moduleArray.push(new Module(2, 2, moduleImages.eco_booster));
+  moduleArray.push(new Module(3, 3, moduleImages.hub_booster));
+  moduleArray.push(new Module(4, 4, moduleImages.hub));
+  moduleArray.push(new Module(5, 5, moduleImages.landing_booster));
+  moduleArray.push(new Module(10, 10, moduleImages.landing_gear));
+  moduleArray.push(new Module(9.25, 7, moduleImages.power_hub));
+  moduleArray.push(new Module(8, 8, moduleImages.solar_panel));
+  moduleArray.push(new Module(7, 9, moduleImages.super_booster));
 }
 
 function draw() {
@@ -145,7 +156,7 @@ function mousePressed() {
 }
 
 function mouseDragged() {
-  if (draggedModule && !draggedModule.pickable) {
+  if (draggedModule && !draggedModule.type.attatched) {
     Matter.Body.setPosition(draggedModule.body, {
       x: mouseX - (width/2 - shipBody.position.x),
       y: mouseY - (height/2 - shipBody.position.y)
@@ -156,23 +167,42 @@ function mouseDragged() {
         bodyB: draggedModule.body,
         pointA: {x: 0, y: 0},
         pointB: {x: 0, y: 0},
-        stiffness: 1,
+        length: MODULE_SIZE,
+        stiffness: 0,
       };
       let constraint = Matter.Constraint.create(options);
       Matter.World.add(world,constraint);
-      draggedModule.picked = true;
+      draggedModule.type.attatched = true;
+    }
+    else {
+      for (let module of moduleArray) {
+        if (abs(draggedModule.body.position.x-module.body.position.x) < MODULE_SIZE && abs(module.body.position.y-module.body.position.y) < MODULE_SIZE && module.type.attatched === true) {
+          let options = {
+            bodyA: module.body,
+            bodyB: draggedModule.body,
+            pointA: {x: 0, y: 0},
+            pointB: {x: 0, y: 0},
+            length: MODULE_SIZE,
+            stiffness: 0,
+          };
+          let constraint = Matter.Constraint.create(options);
+          Matter.World.add(world,constraint);
+          draggedModule.type.attatched = true;
+        }
+      }
     }
   }
 }
 
 function mouseReleased() {
-  draggedModule = null;
+  // draggedModule = null;
 }
 
 function shipControls() {
   // W
   if (keyIsDown(87)) {
     Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
+    Booster.thrust();
   }
   // A
   if (keyIsDown(65)) {
