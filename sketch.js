@@ -44,6 +44,9 @@ class Module {
   containsPoint(x, y) {
     return Matter.Bounds.contains(this.body.bounds, {x:x, y:y});
   }
+
+  thrust() {
+  }
 }
 
 class Booster extends Module {
@@ -51,9 +54,16 @@ class Booster extends Module {
     super(posx, posy, type);
     this.thrust = thrust;
   }
+
+  boost() {
+    super.thrust();
+  }
   
-  thrust() {
-    Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
+  boost() {
+    super.thrust();
+    if (this.type.attatched) {
+      Matter.Body.applyForce(this.body, this.body.position, {x: FORCE*Math.cos(this.body.angle - HALF_PI), y: FORCE*Math.sin(this.body.angle - HALF_PI)});
+    }
   }
 }
 
@@ -120,15 +130,15 @@ function setup() {
 
   // example test modules
   moduleArray.push(new Booster(0, 0, moduleImages.booster, 1));
-  moduleArray.push(new Module(1, 0, moduleImages.cargo));
-  moduleArray.push(new Module(2, 2, moduleImages.eco_booster));
-  moduleArray.push(new Module(3, 3, moduleImages.hub_booster));
-  moduleArray.push(new Module(4, 4, moduleImages.hub));
-  moduleArray.push(new Module(5, 5, moduleImages.landing_booster));
-  moduleArray.push(new Module(10, 10, moduleImages.landing_gear));
-  moduleArray.push(new Module(9.25, 7, moduleImages.power_hub));
-  moduleArray.push(new Module(8, 8, moduleImages.solar_panel));
-  moduleArray.push(new Module(7, 9, moduleImages.super_booster));
+  // moduleArray.push(new Module(1, 0, moduleImages.cargo));
+  // moduleArray.push(new Module(2, 2, moduleImages.eco_booster));
+  // moduleArray.push(new Module(3, 3, moduleImages.hub_booster));
+  // moduleArray.push(new Module(4, 4, moduleImages.hub));
+  // moduleArray.push(new Module(5, 5, moduleImages.landing_booster));
+  // moduleArray.push(new Module(10, 10, moduleImages.landing_gear));
+  // moduleArray.push(new Module(9.25, 7, moduleImages.power_hub));
+  // moduleArray.push(new Module(8, 8, moduleImages.solar_panel));
+  // moduleArray.push(new Module(7, 9, moduleImages.super_booster));
 }
 
 function draw() {
@@ -202,7 +212,9 @@ function shipControls() {
   // W
   if (keyIsDown(87)) {
     Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
-    Booster.thrust();
+    for (let module of moduleArray) {
+      module.boost();
+    }
   }
   // A
   if (keyIsDown(65)) {
