@@ -26,6 +26,40 @@ let planetImages;
 // state variables
 let started = false;
 
+class Particle {
+  constructor(x, y, type, color, size, rotation, dx, dy, lifetime, angle) {
+    this.x = x;
+    this.y = y;
+    this.type = type;
+    this.color = color;
+    this.size = size;
+    this.rotation = rotation;
+    this.dx = dx;
+    this.dy = dy;
+    this.lifetime = lifetime;
+    this.angle = 0;
+    this.age = 0;
+  }
+
+  display() {
+    push();
+    translate(this.x, this.y);
+    rotate(this.angle);
+    fill(this.color);
+    square(this.x, this.y, this.size);
+    pop();
+  }
+
+  move() {
+    this.x += this.dx;
+    this.y += this.dy;
+    this.age += 1;
+    if (this.age > this.lifetime) {
+      console.log("dead");
+    }
+  }
+}
+
 class Module {
   constructor(posx, posy, type) {
     this.type = type;
@@ -57,17 +91,16 @@ class Booster extends Module {
 
   boost() {
     super.thrust();
-  }
-  
-  boost() {
-    super.thrust();
     if (this.type.attatched) {
       Matter.Body.applyForce(this.body, this.body.position, {x: FORCE*Math.cos(this.body.angle - HALF_PI), y: FORCE*Math.sin(this.body.angle - HALF_PI)});
+      particleArray.push(new Particle(this.body.position.x, this.body.position.x, square, color(255, 0, 0), 5, 0, 5, 5, 1000));
+      // moduleArray.push(new Booster(0, 0, moduleImages.booster, 1))
     }
   }
 }
 
 let moduleArray = [];
+let particleArray = [];
 
 function preload() {
   moduleImages = {
@@ -110,7 +143,13 @@ function displayModules() {
   for (let module of moduleArray) {
     module.display(module.type,0,0);
   }
-  
+}
+
+function displayParticles() {
+  for (let particle of particleArray) {
+    particle.display();
+    particle.move();
+  }
 }
 
 function setup() {
@@ -146,6 +185,7 @@ function draw() {
 
   if (started) {
     displayModules();
+    displayParticles();
     shipControls();
   } 
   else {
