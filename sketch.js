@@ -170,7 +170,12 @@ function setup() {
   Matter.World.add(world, earthBody);
 
   // example test modules
-  moduleArray.push(new Booster(0, 0, moduleImages.booster, 1));
+  moduleArray.push(new Booster(5, 5, moduleImages.booster, 1));
+  moduleArray.push(new Booster(5, 6, moduleImages.booster, 1));
+  moduleArray.push(new Booster(6, 5, moduleImages.booster, 1));
+  moduleArray.push(new Booster(6, 6, moduleImages.booster, 1));
+  moduleArray.push(new Booster(7, 5, moduleImages.booster, 1));
+  moduleArray.push(new Booster(7, 6, moduleImages.booster, 1));
   // moduleArray.push(new Module(1, 0, moduleImages.cargo));
   // moduleArray.push(new Module(2, 2, moduleImages.eco_booster));
   // moduleArray.push(new Module(3, 3, moduleImages.hub_booster));
@@ -247,7 +252,7 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
-  // draggedModule = null;
+  draggedModule = null;
 }
 
 function shipControls() {
