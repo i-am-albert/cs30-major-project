@@ -45,8 +45,8 @@ class Particle {
     push();
     translate(this.x, this.y);
     rotate(this.angle);
-    fill(this.color);
-    square(this.x, this.y, this.size);
+    fill(255,0,0,255-this.age);
+    rect(-this.size/2, -this.size/2, this.size, this.size);
     pop();
   }
 
@@ -92,9 +92,10 @@ class Booster extends Module {
   boost() {
     super.thrust();
     if (this.type.attatched) {
-      Matter.Body.applyForce(this.body, this.body.position, {x: FORCE*Math.cos(this.body.angle - HALF_PI), y: FORCE*Math.sin(this.body.angle - HALF_PI)});
-      particleArray.push(new Particle(this.body.position.x, this.body.position.x, square, color(255, 0, 0), 5, 0, 5, 5, 1000));
-      // moduleArray.push(new Booster(0, 0, moduleImages.booster, 1))
+      let dx = FORCE*Math.cos(this.body.angle - HALF_PI)
+      let dy = FORCE*Math.sin(this.body.angle - HALF_PI)
+      Matter.Body.applyForce(this.body, this.body.position, {x: dx, y: dy});
+      particleArray.push(new Particle(this.body.position.x, this.body.position.y, square, color(random(224,255), random(0,127), 0), 5, 0, -dx*10000, -dy*10000, 255, -this.angle));
     }
   }
 }
@@ -154,6 +155,7 @@ function displayParticles() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  noStroke();
 
   engine = Matter.Engine.create();
   world = engine.world;
