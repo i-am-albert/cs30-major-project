@@ -45,7 +45,7 @@ class Particle {
     push();
     translate(this.x, this.y);
     rotate(this.angle);
-    fill(255,0,0,255-this.age);
+    fill(this.color.levels[0],this.color.levels[1],this.color.levels[2],255-this.age);
     rect(-this.size/2, -this.size/2, this.size, this.size);
     pop();
   }
@@ -53,7 +53,7 @@ class Particle {
   move() {
     this.x += this.dx;
     this.y += this.dy;
-    this.age += 1;
+    this.age += 8;
     if (this.age > this.lifetime) {
       console.log("dead");
     }
@@ -79,7 +79,7 @@ class Module {
     return Matter.Bounds.contains(this.body.bounds, {x:x, y:y});
   }
 
-  thrust() {
+  boost() {
   }
 }
 
@@ -89,13 +89,19 @@ class Booster extends Module {
     this.thrust = thrust;
   }
 
+  containsPoint(x, y) {
+    return Matter.Bounds.contains(this.body.bounds, {x:x, y:y});
+  }
+
   boost() {
-    super.thrust();
+    super.boost();
     if (this.type.attatched) {
-      let dx = FORCE*Math.cos(this.body.angle - HALF_PI)
-      let dy = FORCE*Math.sin(this.body.angle - HALF_PI)
+      let dx = this.thrust*FORCE*Math.cos(this.body.angle - HALF_PI)
+      let dy = this.thrust*FORCE*Math.sin(this.body.angle - HALF_PI)
       Matter.Body.applyForce(this.body, this.body.position, {x: dx, y: dy});
-      particleArray.push(new Particle(this.body.position.x, this.body.position.y, square, color(random(224,255), random(0,127), 0), 5, 0, -dx*10000, -dy*10000, 255, -this.angle));
+      if (frameCount % 1 === 0) {
+        particleArray.push(new Particle(this.body.position.x, this.body.position.y, square, color(random(224,255), random(0,127), 0), 20, 0, -dx*5000, -dy*5000, 255, -this.angle));
+      }
     }
   }
 }
@@ -130,7 +136,6 @@ function displayStartScreen() {
 function displayModules() {
   Matter.Engine.update(engine);
   translate(width/2 - shipBody.position.x, height/2 - shipBody.position.y);
-
   push();
   translate(shipBody.position.x, shipBody.position.y);
   rotate(shipBody.angle);
@@ -150,6 +155,9 @@ function displayParticles() {
   for (let particle of particleArray) {
     particle.display();
     particle.move();
+    if (particle.lifetime - particle.age < 0) {
+      particleArray.splice(particle, 1);
+    }
   }
 }
 
@@ -170,21 +178,21 @@ function setup() {
   Matter.World.add(world, earthBody);
 
   // example test modules
-  moduleArray.push(new Booster(5, 5, moduleImages.booster, 1));
+  moduleArray.push(new Booster(5, 5, moduleImages.booster, 3));
   moduleArray.push(new Booster(5, 6, moduleImages.booster, 1));
-  moduleArray.push(new Booster(6, 5, moduleImages.booster, 1));
-  moduleArray.push(new Booster(6, 6, moduleImages.booster, 1));
-  moduleArray.push(new Booster(7, 5, moduleImages.booster, 1));
-  moduleArray.push(new Booster(7, 6, moduleImages.booster, 1));
-  // moduleArray.push(new Module(1, 0, moduleImages.cargo));
-  // moduleArray.push(new Module(2, 2, moduleImages.eco_booster));
-  // moduleArray.push(new Module(3, 3, moduleImages.hub_booster));
-  // moduleArray.push(new Module(4, 4, moduleImages.hub));
-  // moduleArray.push(new Module(5, 5, moduleImages.landing_booster));
-  // moduleArray.push(new Module(10, 10, moduleImages.landing_gear));
-  // moduleArray.push(new Module(9.25, 7, moduleImages.power_hub));
-  // moduleArray.push(new Module(8, 8, moduleImages.solar_panel));
-  // moduleArray.push(new Module(7, 9, moduleImages.super_booster));
+  // moduleArray.push(new Booster(6, 5, moduleImages.booster, 1));
+  // moduleArray.push(new Booster(6, 6, moduleImages.booster, 1));
+  // moduleArray.push(new Booster(7, 5, moduleImages.booster, 1));
+  // moduleArray.push(new Booster(7, 6, moduleImages.booster, 1));
+  moduleArray.push(new Module(1, 0, moduleImages.cargo));
+  moduleArray.push(new Module(2, 2, moduleImages.eco_booster));
+  moduleArray.push(new Module(3, 3, moduleImages.hub_booster));
+  moduleArray.push(new Module(4, 4, moduleImages.hub));
+  moduleArray.push(new Module(5, 5, moduleImages.landing_booster));
+  moduleArray.push(new Module(10, 10, moduleImages.landing_gear));
+  moduleArray.push(new Module(9.25, 7, moduleImages.power_hub));
+  moduleArray.push(new Module(8, 8, moduleImages.solar_panel));
+  moduleArray.push(new Module(7, 9, moduleImages.super_booster));
 }
 
 function draw() {
@@ -192,8 +200,8 @@ function draw() {
 
   if (started) {
     displayModules();
-    displayParticles();
     shipControls();
+    displayParticles();
   } 
   else {
     displayStartScreen();
@@ -222,8 +230,6 @@ function mouseDragged() {
       let options = {
         bodyA: shipBody,
         bodyB: draggedModule.body,
-        pointA: {x: 0, y: 0},
-        pointB: {x: 0, y: 0},
         length: MODULE_SIZE,
         stiffness: 0,
       };
