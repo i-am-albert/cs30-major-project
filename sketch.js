@@ -34,10 +34,10 @@ class Particle {
     this.color = color;
     this.size = size;
     this.rotation = rotation;
-    this.dx = dx;
-    this.dy = dy;
+    this.dx = dx + shipBody.velocity.x + random(-2,2);
+    this.dy = dy + shipBody.velocity.y + random(-2,2);
     this.lifetime = lifetime;
-    this.angle = 0;
+    this.angle = angle;
     this.age = 0;
   }
 
@@ -54,9 +54,6 @@ class Particle {
     this.x += this.dx;
     this.y += this.dy;
     this.age += 8;
-    if (this.age > this.lifetime) {
-      console.log("dead");
-    }
   }
 }
 
@@ -99,9 +96,7 @@ class Booster extends Module {
       let dx = this.thrust*FORCE*Math.cos(this.body.angle - HALF_PI)
       let dy = this.thrust*FORCE*Math.sin(this.body.angle - HALF_PI)
       Matter.Body.applyForce(this.body, this.body.position, {x: dx, y: dy});
-      if (frameCount % 1 === 0) {
-        particleArray.push(new Particle(this.body.position.x, this.body.position.y, square, color(random(224,255), random(0,127), 0), 20, 0, -dx*5000, -dy*5000, 255, -this.angle));
-      }
+      particleArray.push(new Particle(this.body.position.x, this.body.position.y, square, color(random(255,255), random(0,127), 0), 20, 0, -dx*5000, -dy*5000, 255, this.body.angle));
     }
   }
 }
@@ -141,7 +136,6 @@ function displayModules() {
   rotate(shipBody.angle);
   image(moduleImages.heart_hub, -MODULE_SIZE/2, -MODULE_SIZE/2, MODULE_SIZE, MODULE_SIZE);
   pop();
-
   push();
   translate(earthBody.position.x, earthBody.position.y);
   image(planetImages.earth, -150, -150, 300, 300);
@@ -179,20 +173,20 @@ function setup() {
 
   // example test modules
   moduleArray.push(new Booster(5, 5, moduleImages.booster, 3));
-  moduleArray.push(new Booster(5, 6, moduleImages.booster, 1));
+  moduleArray.push(new Booster(5, 6, moduleImages.booster, 3));
   // moduleArray.push(new Booster(6, 5, moduleImages.booster, 1));
   // moduleArray.push(new Booster(6, 6, moduleImages.booster, 1));
   // moduleArray.push(new Booster(7, 5, moduleImages.booster, 1));
   // moduleArray.push(new Booster(7, 6, moduleImages.booster, 1));
   moduleArray.push(new Module(1, 0, moduleImages.cargo));
-  moduleArray.push(new Module(2, 2, moduleImages.eco_booster));
-  moduleArray.push(new Module(3, 3, moduleImages.hub_booster));
+  moduleArray.push(new Booster(2, 2, moduleImages.eco_booster, 2));
+  moduleArray.push(new Booster(3, 3, moduleImages.hub_booster, 3));
   moduleArray.push(new Module(4, 4, moduleImages.hub));
-  moduleArray.push(new Module(5, 5, moduleImages.landing_booster));
+  moduleArray.push(new Booster(5, 5, moduleImages.landing_booster, 2));
   moduleArray.push(new Module(10, 10, moduleImages.landing_gear));
   moduleArray.push(new Module(9.25, 7, moduleImages.power_hub));
   moduleArray.push(new Module(8, 8, moduleImages.solar_panel));
-  moduleArray.push(new Module(7, 9, moduleImages.super_booster));
+  moduleArray.push(new Booster(7, 9, moduleImages.super_booster, 5));
 }
 
 function draw() {
@@ -239,7 +233,7 @@ function mouseDragged() {
     }
     else {
       for (let module of moduleArray) {
-        if (abs(draggedModule.body.position.x-module.body.position.x) < MODULE_SIZE && abs(module.body.position.y-module.body.position.y) < MODULE_SIZE && module.type.attatched === true) {
+        if (abs(draggedModule.body.position.x-module.body.position.x) < MODULE_SIZE && abs(draggedModule.body.position.y-module.body.position.y) < MODULE_SIZE && module.type.attatched === true) {
           let options = {
             bodyA: module.body,
             bodyB: draggedModule.body,
@@ -266,7 +260,10 @@ function shipControls() {
   if (keyIsDown(87)) {
     Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
     for (let module of moduleArray) {
-      module.boost();
+      // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
+      if (true) {
+        module.boost();
+      }
     }
   }
   // A
