@@ -70,8 +70,8 @@ class Module {
     rotate(this.body.angle);
     image(this.type, -MODULE_SIZE/2, -MODULE_SIZE/2, MODULE_SIZE, MODULE_SIZE);
     pop();
-    if (!this.body.type.attatched) {
-      // this.module.body.collisionFilter.category=1;
+    if (this.body.type.attatched) {
+      this.module.body.collisionFilter.category=1;
     }
   }
 
@@ -199,6 +199,7 @@ function draw() {
     displayModules();
     shipControls();
     displayParticles();
+    moduleDragging();
   } 
   else {
     displayStartScreen();
@@ -217,7 +218,7 @@ function mousePressed() {
   }
 }
 
-function mouseDragged() {
+function moduleDragging() {
   if (draggedModule && !draggedModule.type.attatched) {
     draggedModule.body.collisionFilter.category=1;
     Matter.Body.setPosition(draggedModule.body, {
@@ -256,7 +257,7 @@ function mouseDragged() {
         }
         let currentDistance = xDist + yDist;
         let heartDistance = xDistHeart + yDistHeart;
-        if (currentDistance < closestDist && module !== draggedModule) {
+        if (currentDistance < closestDist && module !== draggedModule && module.type.attatched) {
           closestDist = currentDistance;
           draggedModule.body.angle = Math.atan2(module.body.position.y-draggedModule.body.position.y,module.body.position.x-draggedModule.body.position.x)+1.6;
         }
