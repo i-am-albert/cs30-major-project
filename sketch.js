@@ -70,6 +70,9 @@ class Module {
     rotate(this.body.angle);
     image(this.type, -MODULE_SIZE/2, -MODULE_SIZE/2, MODULE_SIZE, MODULE_SIZE);
     pop();
+    if (!this.body.type.attatched) {
+      // this.module.body.collisionFilter.category=1;
+    }
   }
 
   containsPoint(x, y) {
@@ -182,11 +185,11 @@ function setup() {
   // moduleArray.push(new Booster(2, 2, moduleImages.eco_booster, 2));
   // moduleArray.push(new Booster(3, 3, moduleImages.hub_booster, 3));
   moduleArray.push(new Module(4, 4, moduleImages.hub));
-  // moduleArray.push(new Booster(5, 5, moduleImages.landing_booster, 2));
-  // moduleArray.push(new Module(10, 10, moduleImages.landing_gear));
-  // moduleArray.push(new Module(9.25, 7, moduleImages.power_hub));
-  // moduleArray.push(new Module(8, 8, moduleImages.solar_panel));
-  // moduleArray.push(new Booster(7, 9, moduleImages.super_booster, 5));
+  moduleArray.push(new Booster(5, 5, moduleImages.landing_booster, 2));
+  moduleArray.push(new Module(10, 10, moduleImages.landing_gear));
+  moduleArray.push(new Module(9.25, 7, moduleImages.power_hub));
+  moduleArray.push(new Module(8, 8, moduleImages.solar_panel));
+  moduleArray.push(new Booster(7, 9, moduleImages.super_booster, 5));
 }
 
 function draw() {
@@ -216,6 +219,7 @@ function mousePressed() {
 
 function mouseDragged() {
   if (draggedModule && !draggedModule.type.attatched) {
+    draggedModule.body.collisionFilter.category=1;
     Matter.Body.setPosition(draggedModule.body, {
       x: mouseX - (width/2 - shipBody.position.x),
       y: mouseY - (height/2 - shipBody.position.y)
@@ -232,10 +236,11 @@ function mouseDragged() {
     }
     else {
       for (let module of moduleArray) {
-        let closestModule;
-        let closestDist = 1000;
+        let closestDist = MODULE_SIZE*2;
         let xDist = abs(draggedModule.body.position.x-module.body.position.x);
         let yDist = abs(draggedModule.body.position.y-module.body.position.y);
+        let xDistHeart = abs(draggedModule.body.position.x-shipBody.position.x);
+        let yDistHeart = abs(draggedModule.body.position.y-shipBody.position.y);
         if (xDist < MODULE_SIZE && yDist < MODULE_SIZE && module.type.attatched === true) {
           let options = {
             bodyA: module.body,
@@ -250,10 +255,14 @@ function mouseDragged() {
           draggedModule.type.attatched = true;
         }
         let currentDistance = xDist + yDist;
-        if (currentDistance < closestDist && currentDistance !== 0) {
+        let heartDistance = xDistHeart + yDistHeart;
+        if (currentDistance < closestDist && module !== draggedModule) {
           closestDist = currentDistance;
-          closestModule = module;
-          Matter.Body.set(module, module.body.angle, closestModule.body.angle);
+          draggedModule.body.angle = Math.atan2(module.body.position.y-draggedModule.body.position.y,module.body.position.x-draggedModule.body.position.x)+1.6;
+        }
+        else if (heartDistance < closestDist) {
+          closestDist = currentDistance;
+          draggedModule.body.angle = Math.atan2(shipBody.position.y-draggedModule.body.position.y,shipBody.position.x-draggedModule.body.position.x)+1.6;
         }
       }
     }
