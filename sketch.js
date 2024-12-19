@@ -275,12 +275,15 @@ function mouseReleased() {
 }
 
 function shipControls() {
+  let newModuleX = 
+  let newModuleY = 
+  let 
   // W
   if (keyIsDown(87)) {
     Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
     for (let module of moduleArray) {
       // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-      if (true) {
+      if (module.body.position.y > shipBody.position.y) {
         module.boost();
       }
     }
@@ -288,13 +291,31 @@ function shipControls() {
   // A
   if (keyIsDown(65)) {
     Matter.Body.setAngularVelocity(shipBody, shipBody.angularVelocity - TORQUE);
+    for (let module of moduleArray) {
+      // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
+      if (module.body.position.y > shipBody.position.y && module.body.position.x > shipBody.position.x || module.body.position.y < shipBody.position.y && module.body.position.x < shipBody.position.x) {
+        module.boost();
+      }
+    }
   }
   // S
   if (keyIsDown(83)) {
     Matter.Body.applyForce(shipBody, shipBody.position, {x: -FORCE*Math.cos(shipBody.angle - PI/2), y: -FORCE*Math.sin(shipBody.angle - PI/2)});
+    for (let module of moduleArray) {
+      // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
+      if (module.body.position.y < shipBody.position.y) {
+        module.boost();
+      }
+    }
   }
   // D
   if (keyIsDown(68)) {
     Matter.Body.setAngularVelocity(shipBody, shipBody.angularVelocity + TORQUE);
+    for (let module of moduleArray) {
+      // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
+      if (module.body.position.y > shipBody.position.y && module.body.position.x < shipBody.position.x || module.body.position.y < shipBody.position.y && module.body.position.x > shipBody.position.x) {
+        module.boost();
+      }
+    }
   }
 }
