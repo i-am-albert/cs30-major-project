@@ -275,9 +275,8 @@ function mouseReleased() {
 }
 
 function shipControls() {
-  let newModuleX = 
-  let newModuleY = 
-  let 
+  let newModuleX = 0;
+  let newModuleY = 0;
   // W
   if (keyIsDown(87)) {
     Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
