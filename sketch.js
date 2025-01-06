@@ -293,34 +293,40 @@ function shipControls() {
   }
 
   for (let module of moduleArray) {
-    let newModuleX = (module.body.position.x-shipBody.position.x)*cos(shipBody.angle)+shipBody.position.x;
-    let newModuleY = (module.body.position.y-shipBody.position.y)*sin(shipBody.angle)+shipBody.position.y;
-    // W
-    if (keyIsDown(87)) {
-      // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-      if (newModuleY > shipBody.position.y) {
-        module.boost();
+    if (module.type.attatched) {
+      // https://academo.org/demos/rotation-about-point/
+      let tempModuleX = module.body.position.x-shipBody.position.x;
+      let tempModuleY = module.body.position.y-shipBody.position.y;
+      console.log(tempModuleX,tempModuleY);
+      let newModuleX = tempModuleX*cos(module.body.angle)-tempModuleY*sin(module.body.angle)+shipBody.position.x;
+      let newModuleY = tempModuleX*cos(module.body.angle)-tempModuleY*sin(module.body.angle)+shipBody.position.y;
+      // W
+      if (keyIsDown(87)) {
+        // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
+        if (newModuleY > shipBody.position.y) {
+          module.boost();
+        }
       }
-    }
-    // A
-    if (keyIsDown(65)) {
-      // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-      if (newModuleY > shipBody.position.y && newModuleX > shipBody.position.x || newModuleY < shipBody.position.y && newModuleX < shipBody.position.x) {
-        module.boost();
+      // A
+      if (keyIsDown(65)) {
+        // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
+        if (newModuleY > shipBody.position.y && newModuleX > shipBody.position.x || newModuleY < shipBody.position.y && newModuleX < shipBody.position.x) {
+          module.boost();
+        }
       }
-    }
-    // S
-    if (keyIsDown(83)) {
-      // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-      if (newModuleY < shipBody.position.y) {
-        module.boost();
+      // S
+      if (keyIsDown(83)) {
+        // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
+        if (newModuleY < shipBody.position.y) {
+          module.boost();
+        }
       }
-    }
-    // D
-    if (keyIsDown(68)) {
-      // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-      if (newModuleY > shipBody.position.y && newModuleX < shipBody.position.x || newModuleY < shipBody.position.y && newModuleX > shipBody.position.x) {
-        module.boost();
+      // D
+      if (keyIsDown(68)) {
+        // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
+        if (newModuleY > shipBody.position.y && newModuleX < shipBody.position.x || newModuleY < shipBody.position.y && newModuleX > shipBody.position.x) {
+          module.boost();
+        }
       }
     }
   }
