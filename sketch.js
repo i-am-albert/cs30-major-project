@@ -295,15 +295,17 @@ function shipControls() {
   for (let module of moduleArray) {
     if (module.type.attatched) {
       // https://academo.org/demos/rotation-about-point/
-      let tempModuleX = module.body.position.x-shipBody.position.x;
-      let tempModuleY = module.body.position.y-shipBody.position.y;
-      console.log(tempModuleX,tempModuleY);
-      let newModuleX = tempModuleX*cos(module.body.angle)-tempModuleY*sin(module.body.angle)+shipBody.position.x;
-      let newModuleY = tempModuleX*cos(module.body.angle)-tempModuleY*sin(module.body.angle)+shipBody.position.y;
+      let newModuleX = module.body.position.x;
+      let newModuleY = module.body.position.y;
+      // console.log(tempModuleX,tempModuleY);
+      let tempModuleX = newModuleX*cos(-module.body.angle)-newModuleY*sin(-module.body.angle);
+      let tempModuleY = newModuleX*cos(-module.body.angle)-newModuleY*sin(-module.body.angle);
+      // console.log(tempModuleX,tempModuleY);
+      console.log(module.body.angle%(PI*2));
       // W
       if (keyIsDown(87)) {
         // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-        if (newModuleY > shipBody.position.y) {
+        if (PI/4 >= (module.body.angle-shipBody.angle)%(PI*2) && (module.body.angle-shipBody.angle)%(PI*2) <= PI/2) {
           module.boost();
         }
       }
@@ -317,7 +319,7 @@ function shipControls() {
       // S
       if (keyIsDown(83)) {
         // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-        if (newModuleY < shipBody.position.y) {
+        if (PI/4 < (module.body.angle-shipBody.angle)%(PI*2) || (module.body.angle-shipBody.angle)%(PI*2) > PI/2) {
           module.boost();
         }
       }
