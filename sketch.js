@@ -312,7 +312,7 @@ function shipControls() {
       // A
       if (keyIsDown(65)) {
         // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-        if (newModuleY > shipBody.position.y && newModuleX > shipBody.position.x || newModuleY < shipBody.position.y && newModuleX < shipBody.position.x) {
+        if (0 >= (module.body.angle-shipBody.angle)%(PI*2) && (module.body.angle-shipBody.angle)%(PI*2) <= PI) {
           module.boost();
         }
       }
@@ -326,7 +326,7 @@ function shipControls() {
       // D
       if (keyIsDown(68)) {
         // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-        if (newModuleY > shipBody.position.y && newModuleX < shipBody.position.x || newModuleY < shipBody.position.y && newModuleX > shipBody.position.x) {
+        if (0 >= (module.body.angle-shipBody.angle)%(PI*2) && (module.body.angle-shipBody.angle)%(PI*2) <= PI) {
           module.boost();
         }
       }
