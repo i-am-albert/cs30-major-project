@@ -122,7 +122,15 @@ function preload() {
     super_booster: loadImage("assets/modules/super_booster.png"),
   };
   planetImages = {
-    earth: loadImage("assets/planets/earth.png"),
+    mercury: loadImage("assets/planets/mercury.svg"),
+    venus: loadImage("assets/planets/venus.svg"),
+    earth: loadImage("assets/planets/earth.svg"),
+    moon: loadImage("assets/planets/moon.svg"),
+    mars: loadImage("assets/planets/mars.svg"),
+    jupiter: loadImage("assets/planets/jupiter.svg"),
+    saturn: loadImage("assets/planets/saturn.svg"),
+    neptune: loadImage("assets/planets/neptune.svg"),
+    pluto: loadImage("assets/planets/pluto.svg"),
   };
 }
 
@@ -141,7 +149,11 @@ function displayModules() {
   pop();
   push();
   translate(earthBody.position.x, earthBody.position.y);
-  image(planetImages.earth, -150, -150, 300, 300);
+  image(planetImages.earth, -300, -300, 600, 600);
+  pop();
+  push();
+  translate(moonBody.position.x, moonBody.position.y);
+  image(planetImages.moon, -150, -150, 300, 300);
   pop();
   for (let module of moduleArray) {
     module.display(module.type,0,0);
@@ -171,8 +183,10 @@ function setup() {
 
   shipBody = Matter.Bodies.rectangle(width / 2, height / 2, MODULE_SIZE, MODULE_SIZE, {frictionAir: 0.0});
   Matter.World.add(world, shipBody);
-  earthBody = Matter.Bodies.circle(width / 2, height / 2 - 200, 150, {isStatic: true});
+  earthBody = Matter.Bodies.circle(width / 2, height / 2 - 200, 300, {isStatic: true});
   Matter.World.add(world, earthBody);
+  moonBody = Matter.Bodies.circle(width, height / 2 - 200, 150, {isStatic: true});
+  Matter.World.add(world, moonBody);
 
   // example test modules
   moduleArray.push(new Booster(5, 5, moduleImages.booster, 3));
