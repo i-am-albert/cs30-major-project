@@ -155,6 +155,10 @@ function displayModules() {
   translate(moonBody.position.x, moonBody.position.y);
   image(planetImages.moon, -150, -150, 300, 300);
   pop();
+  push();
+  translate(mercuryBody.position.x, mercuryBody.position.y);
+  image(planetImages.mercury, -150, -150, 300, 300);
+  pop();
   for (let module of moduleArray) {
     module.display(module.type,0,0);
   }
@@ -185,25 +189,36 @@ function setup() {
   Matter.World.add(world, shipBody);
   earthBody = Matter.Bodies.circle(width / 2, height / 2 - 200, 300, {isStatic: true});
   Matter.World.add(world, earthBody);
-  moonBody = Matter.Bodies.circle(width, height / 2 - 200, 150, {isStatic: true});
+  moonBody = Matter.Bodies.circle(0, 0, 150, {isStatic: true});
   Matter.World.add(world, moonBody);
+  mercuryBody = Matter.Bodies.circle(0, 500, 150, {isStatic: true});
+  Matter.World.add(world, mercuryBody);
+  venusBody = Matter.Bodies.circle(0, 0, 150, {isStatic: true});
+  Matter.World.add(world, venusBody);
+  marsBody = Matter.Bodies.circle(0, 0, 150, {isStatic: true});
+  Matter.World.add(world, marsBody);
+  jupiterBody = Matter.Bodies.circle(0, 0, 150, {isStatic: true});
+  Matter.World.add(world, jupiterBody);
+  saturnBody = Matter.Bodies.circle(0, 0, 150, {isStatic: true});
+  Matter.World.add(world, saturnBody);
+  uranusBody = Matter.Bodies.circle(0, 0, 150, {isStatic: true});
+  Matter.World.add(world, uranusBody);
+  neptuneBody = Matter.Bodies.circle(0, 0, 150, {isStatic: true});
+  Matter.World.add(world, neptuneBody);
+  plutoBody = Matter.Bodies.circle(0, 0, 150, {isStatic: true});
+  Matter.World.add(world, plutoBody);
 
   // example test modules
-  moduleArray.push(new Booster(5, 5, moduleImages.booster, 3));
-  // moduleArray.push(new Booster(5, 6, moduleImages.booster, 3));
-  // moduleArray.push(new Booster(6, 5, moduleImages.booster, 1));
-  // moduleArray.push(new Booster(6, 6, moduleImages.booster, 1));
-  // moduleArray.push(new Booster(7, 5, moduleImages.booster, 1));
-  // moduleArray.push(new Booster(7, 6, moduleImages.booster, 1));
-  // moduleArray.push(new Module(1, 0, moduleImages.cargo));
-  // moduleArray.push(new Booster(2, 2, moduleImages.eco_booster, 2));
-  // moduleArray.push(new Booster(3, 3, moduleImages.hub_booster, 3));
-  moduleArray.push(new Module(4, 4, moduleImages.hub));
-  moduleArray.push(new Booster(5, 5, moduleImages.landing_booster, 2));
-  moduleArray.push(new Module(10, 10, moduleImages.landing_gear));
-  moduleArray.push(new Module(9.25, 7, moduleImages.power_hub));
-  moduleArray.push(new Module(8, 8, moduleImages.solar_panel));
-  moduleArray.push(new Booster(7, 9, moduleImages.super_booster, 5));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Module(2, 10, moduleImages.cargo));
+  moduleArray.push(new Booster(3, 10, moduleImages.eco_booster, 2));
+  moduleArray.push(new Booster(4, 10, moduleImages.hub_booster, 3));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Booster(6, 10, moduleImages.landing_booster, 2));
+  moduleArray.push(new Module(7, 10, moduleImages.landing_gear));
+  moduleArray.push(new Module(8, 10, moduleImages.power_hub));
+  moduleArray.push(new Module(9, 10, moduleImages.solar_panel));
+  moduleArray.push(new Booster(10, 10, moduleImages.super_booster, 5));
 }
 
 function draw() {
@@ -243,7 +258,10 @@ function moduleDragging() {
       let options = {
         bodyA: shipBody,
         bodyB: draggedModule.body,
-        length: MODULE_SIZE,
+        pointA: {x: 0, y: 0},
+        pointB: {x: 0, y: 0},
+        length: MODULE_SIZE-1,
+        stiffness: 1,
       };
       let constraint = Matter.Constraint.create(options);
       Matter.World.add(world,constraint);
@@ -262,8 +280,8 @@ function moduleDragging() {
             bodyB: draggedModule.body,
             pointA: {x: 0, y: 0},
             pointB: {x: 0, y: 0},
-            length: MODULE_SIZE,
-            stiffness: 0,
+            length: MODULE_SIZE-1,
+            stiffness: 0.5,
           };
           let constraint = Matter.Constraint.create(options);
           Matter.World.add(world,constraint);
@@ -281,6 +299,13 @@ function moduleDragging() {
         }
       }
     }
+  }
+  else if (draggedModule) {
+    for (constraint of world.constraints) {
+      if (constraint.bodyB === draggedModule.body) {
+        Matter.Composite.remove(engine.world,draggedModule);
+      }
+    } 
   }
 }
 
@@ -315,7 +340,7 @@ function shipControls() {
       let tempModuleX = newModuleX*cos(-module.body.angle)-newModuleY*sin(-module.body.angle);
       let tempModuleY = newModuleX*cos(-module.body.angle)-newModuleY*sin(-module.body.angle);
       // console.log(tempModuleX,tempModuleY);
-      console.log(module.body.angle%(PI*2));
+      // console.log(module.body.angle%(PI*2));
       // W
       if (keyIsDown(87)) {
         // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
@@ -326,9 +351,10 @@ function shipControls() {
       // A
       if (keyIsDown(65)) {
         // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-        if (0 >= (module.body.angle-shipBody.angle)%(PI*2) && (module.body.angle-shipBody.angle)%(PI*2) <= PI) {
-          module.boost();
-        }
+        // if (0 >= (module.body.angle-shipBody.angle)%(PI*2) && (module.body.angle-shipBody.angle)%(PI*2) <= PI) {
+        //   module.boost();
+        // }
+        Matter.Body.setAngularVelocity(shipBody, shipBody.angularVelocity - TORQUE);
       }
       // S
       if (keyIsDown(83)) {
@@ -340,9 +366,10 @@ function shipControls() {
       // D
       if (keyIsDown(68)) {
         // if (0 < sin(module.body.angle) && sin(module.body.angle) < 1) {
-        if (0 >= (module.body.angle-shipBody.angle)%(PI*2) && (module.body.angle-shipBody.angle)%(PI*2) <= PI) {
-          module.boost();
-        }
+        // if (0 >= (module.body.angle-shipBody.angle)%(PI*2) && (module.body.angle-shipBody.angle)%(PI*2) <= PI) {
+        //   module.boost();
+        // }
+        Matter.Body.setAngularVelocity(shipBody, shipBody.angularVelocity + TORQUE);
       }
     }
   }
