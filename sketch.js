@@ -249,54 +249,29 @@ function mousePressed() {
 
 function moduleDragging() {
   if (draggedModule && !draggedModule.type.attatched) {
-    draggedModule.body.collisionFilter.category=1;
+    draggedModule.body.collisionFilter.category=0;
     Matter.Body.setPosition(draggedModule.body, {
       x: mouseX - (width/2 - shipBody.position.x),
       y: mouseY - (height/2 - shipBody.position.y)
     });
-    if (abs(draggedModule.body.position.x-shipBody.position.x) < MODULE_SIZE && abs(draggedModule.body.position.y-shipBody.position.y) < MODULE_SIZE) {
-      let options = {
-        bodyA: shipBody,
-        bodyB: draggedModule.body,
-        pointA: {x: 0, y: 0},
-        pointB: {x: 0, y: 0},
-        length: MODULE_SIZE-1,
-        stiffness: 1,
-      };
-      let constraint = Matter.Constraint.create(options);
-      Matter.World.add(world,constraint);
-      draggedModule.type.attatched = true;
-    }
-    else {
-      for (let module of moduleArray) {
-        let closestDist = MODULE_SIZE*2;
-        let xDist = abs(draggedModule.body.position.x-module.body.position.x);
-        let yDist = abs(draggedModule.body.position.y-module.body.position.y);
-        let xDistHeart = abs(draggedModule.body.position.x-shipBody.position.x);
-        let yDistHeart = abs(draggedModule.body.position.y-shipBody.position.y);
-        if (xDist < MODULE_SIZE && yDist < MODULE_SIZE && module.type.attatched === true) {
-          let options = {
-            bodyA: module.body,
-            bodyB: draggedModule.body,
-            pointA: {x: 0, y: 0},
-            pointB: {x: 0, y: 0},
-            length: MODULE_SIZE-1,
-            stiffness: 0.5,
-          };
-          let constraint = Matter.Constraint.create(options);
-          Matter.World.add(world,constraint);
-          draggedModule.type.attatched = true;
-        }
-        let currentDistance = xDist + yDist;
-        let heartDistance = xDistHeart + yDistHeart;
-        if (currentDistance < closestDist && module !== draggedModule && module.type.attatched) {
-          closestDist = currentDistance;
-          draggedModule.body.angle = Math.atan2(module.body.position.y-draggedModule.body.position.y,module.body.position.x-draggedModule.body.position.x)+1.6;
-        }
-        else if (heartDistance < closestDist) {
-          closestDist = currentDistance;
-          draggedModule.body.angle = Math.atan2(shipBody.position.y-draggedModule.body.position.y,shipBody.position.x-draggedModule.body.position.x)+1.6;
-        }
+    // let closestDist = MODULE_SIZE*2;
+    for (let module of moduleArray) {
+      let xDist = abs(draggedModule.body.position.x-module.body.position.x);
+      let yDist = abs(draggedModule.body.position.y-module.body.position.y);
+      let xDistHeart = abs(draggedModule.body.position.x-shipBody.position.x);
+      let yDistHeart = abs(draggedModule.body.position.y-shipBody.position.y);
+      let heartDistance = xDistHeart + yDistHeart;
+      let distance = xDist + yDist;
+      if (closestDist >= currentDistance) {
+        closestDist = currentDistance;
+      }
+      if (currentDistance < closestDist && module !== draggedModule && module.type.attatched && currentDistance < heartDistance) {
+        closestDist = currentDistance;
+        draggedModule.body.angle = Math.atan2(module.body.position.y-draggedModule.body.position.y,module.body.position.x-draggedModule.body.position.x)+1.6;
+      }
+      else if (heartDistance < closestDist) {
+        closestDist = currentDistance;
+        draggedModule.body.angle = Math.atan2(shipBody.position.y-draggedModule.body.position.y,shipBody.position.x-draggedModule.body.position.x)+1.6;
       }
     }
   }
@@ -310,6 +285,45 @@ function moduleDragging() {
 }
 
 function mouseReleased() {
+  if (draggedModule) {
+    draggedModule.body.collisionFilter.category=1;
+    if (abs(draggedModule.body.position.x-shipBody.position.x) < MODULE_SIZE && abs(draggedModule.body.position.y-shipBody.position.y) < MODULE_SIZE) {
+      let options = {
+        bodyA: shipBody,
+        bodyB: draggedModule.body,
+        pointA: {x: 0, y: 0},
+        pointB: {x: 0, y: 0},
+        length: MODULE_SIZE+1,
+        stiffness: 1,
+      };
+      let constraint = Matter.Constraint.create(options);
+      Matter.World.add(world,constraint);
+      draggedModule.type.attatched = true;
+    }
+    else {
+      for (let module of moduleArray) {
+        let xDist = abs(draggedModule.body.position.x-module.body.position.x);
+        let yDist = abs(draggedModule.body.position.y-module.body.position.y);
+        if (xDist < MODULE_SIZE && yDist < MODULE_SIZE && module.type.attatched === true) {
+          draggedModule.body.velocity.x = shipBody.velocity.x;
+          draggedModule.body.velocity.y = shipBody.velocity.y;
+          let options = {
+            bodyA: module.body,
+            bodyB: draggedModule.body,
+            pointA: {x: 0, y: 0},
+            pointB: {x: 0, y: 0},
+            length: MODULE_SIZE-1,
+            stiffness: 0.5,
+          };
+          let constraint = Matter.Constraint.create(options);
+          Matter.World.add(world,constraint);
+          draggedModule.type.attatched = true;
+        }
+      }
+    }
+  }
+  Matter.Body.setSpeed(draggedModule.body, 0);
+  Matter.Body.setAngularSpeed(draggedModule.body, 0);
   draggedModule = null;
 }
 
