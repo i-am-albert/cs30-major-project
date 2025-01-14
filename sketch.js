@@ -108,6 +108,7 @@ let moduleArray = [];
 let particleArray = [];
 
 function preload() {
+  backgroundImage = loadImage("assets/background.png"),
   moduleImages = {
     booster: loadImage("assets/modules/booster.png"),
     cargo: loadImage("assets/modules/cargo.png"),
@@ -222,7 +223,7 @@ function setup() {
 }
 
 function draw() {
-  background(0);
+  image(backgroundImage,0,0,width,height);
 
   if (started) {
     displayModules();
@@ -254,26 +255,38 @@ function moduleDragging() {
       x: mouseX - (width/2 - shipBody.position.x),
       y: mouseY - (height/2 - shipBody.position.y)
     });
-    // let closestDist = MODULE_SIZE*2;
+    let closestDist = Infinity;
+    let closestModule = null;
+
     for (let module of moduleArray) {
       let xDist = abs(draggedModule.body.position.x-module.body.position.x);
       let yDist = abs(draggedModule.body.position.y-module.body.position.y);
       let xDistHeart = abs(draggedModule.body.position.x-shipBody.position.x);
       let yDistHeart = abs(draggedModule.body.position.y-shipBody.position.y);
+
       let heartDistance = xDistHeart + yDistHeart;
-      let distance = xDist + yDist;
-      if (closestDist >= currentDistance) {
-        closestDist = currentDistance;
+      let moduleDistance = xDist + yDist;
+
+      if (heartDistance < moduleDistance) {
+        currentDistance = heartDistance;
       }
-      if (currentDistance < closestDist && module !== draggedModule && module.type.attatched && currentDistance < heartDistance) {
-        closestDist = currentDistance;
-        draggedModule.body.angle = Math.atan2(module.body.position.y-draggedModule.body.position.y,module.body.position.x-draggedModule.body.position.x)+1.6;
+      else {
+        currentDistance = moduleDistance;
       }
-      else if (heartDistance < closestDist) {
+
+      console.log(closestModule);
+
+      if (currentDistance < closestDist) {
         closestDist = currentDistance;
-        draggedModule.body.angle = Math.atan2(shipBody.position.y-draggedModule.body.position.y,shipBody.position.x-draggedModule.body.position.x)+1.6;
+        if (heartDistance < moduleDistance && module.body !== draggedModule) {
+          closestModule = module.body;
+        }
+        else {
+          closestModule = shipBody;
+        }
       }
     }
+    draggedModule.body.angle = Math.atan2(closestModule.position.y-draggedModule.body.position.y,closestModule.position.x-draggedModule.body.position.x)+1.6;
   }
   else if (draggedModule) {
     for (constraint of world.constraints) {
