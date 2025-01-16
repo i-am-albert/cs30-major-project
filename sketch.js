@@ -145,7 +145,7 @@ function displayStartScreen() {
   textSize(48);
   fill(255);
   text("Glap.io Recreation", width/2, height/5);
-  image(moduleImages.heart_hub, width/2 - 100, height/2 - 75, 200, 200)
+  image(moduleImages.heart_hub, width/2 - 100, height/2 - 75, 200, 200);
 
   textSize(24);
   text("WASD to move, drag modules to attach to your ship", width/2, height/3);
@@ -199,7 +199,7 @@ function displayModules() {
 
 function displayParticles() {
   push();
-  translate((width / 2 - shipBody.position.x), (height / 2 - shipBody.position.y));
+  translate(width / 2 - shipBody.position.x, height / 2 - shipBody.position.y);
 
   for (let particle of particleArray) {
     particle.display();
@@ -271,7 +271,8 @@ function draw() {
     shipControls();
     moduleDragging();
     drawEarthIndicator();
-  } else {
+  } 
+  else {
     displayStartScreen();
   }
 }
@@ -455,9 +456,9 @@ function mouseReleased() {
             x: 0,
             y: 0
           },
-          length: 1,
-          stiffness: 0.9,
-          damping: 0.5
+          length: 0,
+          stiffness: 0,
+          damping: 0
         };
         let constraint = Matter.Constraint.create(options);
         Matter.World.add(world, constraint);
@@ -488,9 +489,9 @@ function mouseReleased() {
                   x: 0,
                   y: 0
                 },
-                length: 1,
-                stiffness: 0.9,
-                damping: 0.5
+                length: 0,
+                stiffness: 0,
+                damping: 0,
               };
               let constraint = Matter.Constraint.create(options);
               Matter.World.add(world, constraint);
@@ -498,7 +499,6 @@ function mouseReleased() {
               Matter.Body.setAngle(draggedModule.body, connection.angle);
             }
           }
-          if (draggedModule.type.attached);
         }
       }
     }
@@ -552,6 +552,7 @@ function shipControls() {
       }
       // A
       if (keyIsDown(65)) {
+        Matter.Body.setAngularVelocity(module.body, module.body.angularVelocity - TORQUE);
         if (localX * localY > 0) {
           module.boost();
         }
@@ -568,6 +569,7 @@ function shipControls() {
       }
       // D
       if (keyIsDown(68)) {
+        Matter.Body.setAngularVelocity(module.body, module.body.angularVelocity + TORQUE);
         if (localX * localY < 0) {
           module.boost();
         }
