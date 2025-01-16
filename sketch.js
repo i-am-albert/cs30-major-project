@@ -34,8 +34,8 @@ class Particle {
     this.color = color;
     this.size = size;
     this.rotation = rotation;
-    this.dx = dx + shipBody.velocity.x + random(-2,2);
-    this.dy = dy + shipBody.velocity.y + random(-2,2);
+    this.dx = dx + shipBody.velocity.x + random(-1,1);
+    this.dy = dy + shipBody.velocity.y + random(-1,1);
     this.lifetime = lifetime;
     this.angle = angle;
     this.age = 0;
@@ -53,6 +53,7 @@ class Particle {
   move() {
     this.x += this.dx;
     this.y += this.dy;
+    this.size ++;
     this.age += 8;
   }
 }
@@ -63,6 +64,7 @@ class Module {
     this.type = type;
     this.body = Matter.Bodies.rectangle(posx*MODULE_SIZE, posy*MODULE_SIZE, MODULE_SIZE, MODULE_SIZE, {frictionAir: 0.0});
     Matter.World.add(world, this.body);
+    this.attached = false;
   }
 
   display() {
@@ -71,7 +73,7 @@ class Module {
     rotate(this.body.angle);
     image(this.type, -MODULE_SIZE/2, -MODULE_SIZE/2, MODULE_SIZE, MODULE_SIZE);
     pop();
-    if (this.body.type.attached) {
+    if (this.body.attached) {
       this.module.body.collisionFilter.category=1;
     }
   }
@@ -97,11 +99,11 @@ class Booster extends Module {
 
   boost() {
     super.boost();
-    if (this.type.attached) {
+    if (this.attached) {
       let dx = this.thrust*FORCE*Math.cos(this.body.angle - HALF_PI);
       let dy = this.thrust*FORCE*Math.sin(this.body.angle - HALF_PI);
       Matter.Body.applyForce(this.body, this.body.position, {x: dx, y: dy});
-      particleArray.push(new Particle(this.body.position.x, this.body.position.y, square, color(random(255,255), random(0,127), 0), 20, 0, -dx*5000, -dy*5000, 255, this.body.angle));
+      particleArray.push(new Particle(this.body.position.x, this.body.position.y, square, color(random(255,255), random(0,127), 0), random(10,15), 0, -dx*5000, -dy*5000, 255, this.body.angle));
     }
   }
 }
@@ -251,15 +253,57 @@ function setup() {
 
   // example test modules
   moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Module(2, 10, moduleImages.cargo));
-  moduleArray.push(new Booster(3, 10, moduleImages.eco_booster, 2));
-  moduleArray.push(new Booster(4, 10, moduleImages.hub_booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
+
   moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Booster(6, 10, moduleImages.landing_booster, 2));
-  moduleArray.push(new Module(7, 10, moduleImages.landing_gear));
-  moduleArray.push(new Module(8, 10, moduleImages.power_hub));
-  moduleArray.push(new Module(9, 10, moduleImages.solar_panel));
-  moduleArray.push(new Booster(10, 10, moduleImages.super_booster, 5));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+  moduleArray.push(new Module(5, 10, moduleImages.hub));
+
+  moduleArray.push(new Module(2, 10, moduleImages.cargo));
+
+  // moduleArray.push(new Module(2, 10, moduleImages.cargo));
+  // moduleArray.push(new Booster(3, 10, moduleImages.eco_booster, 2));
+  // moduleArray.push(new Booster(4, 10, moduleImages.hub_booster, 3));
+  // moduleArray.push(new Module(5, 10, moduleImages.hub));
+  // moduleArray.push(new Booster(6, 10, moduleImages.landing_booster, 2));
+  // moduleArray.push(new Module(7, 10, moduleImages.landing_gear));
+  // moduleArray.push(new Module(8, 10, moduleImages.power_hub));
+  // moduleArray.push(new Module(9, 10, moduleImages.solar_panel));
+  // moduleArray.push(new Booster(10, 10, moduleImages.super_booster, 5));
 }
 
 function draw() {
@@ -271,9 +315,21 @@ function draw() {
     shipControls();
     moduleDragging();
     drawEarthIndicator();
+    // spawnCargo();
   } 
   else {
     displayStartScreen();
+  }
+}
+
+function spawnCargo() {
+  let totalCargo = 0;
+  for (module of moduleArray) {
+  }
+  if (totalCargo < 8) {
+    if (frameCount%180 === 0) {
+      moduleArray.push(new Module(random(0,16), random(0,16), moduleImages.cargo));
+    }
   }
 }
 
@@ -371,7 +427,7 @@ function getModuleConnections(body) {
 }
 
 function moduleDragging() {
-  if (draggedModule && !draggedModule.type.attached) {
+  if (draggedModule && !draggedModule.attached) {
     // no collision with other modules
     draggedModule.body.collisionFilter.category = 0;
     
@@ -403,7 +459,7 @@ function moduleDragging() {
 
     // Check other module connections
     for (let module of moduleArray) {
-      if (module.body !== draggedModule.body && module.type.attached) {
+      if (module.body !== draggedModule.body && module.attached) {
         let connections = getModuleConnections(module.body);
         
         for (let connection of connections) {
@@ -462,15 +518,15 @@ function mouseReleased() {
         };
         let constraint = Matter.Constraint.create(options);
         Matter.World.add(world, constraint);
-        draggedModule.type.attached = true;
+        draggedModule.attached = true;
         Matter.Body.setAngle(draggedModule.body, connection.angle);
       }
     }
 
     // Check connection to other modules
-    if (!draggedModule.type.attached) {
+    if (!draggedModule.attached) {
       for (let module of moduleArray) {
-        if (module.type.attached && module.body !== draggedModule.body) {
+        if (module.attached && module.body !== draggedModule.body) {
           let connections = getModuleConnections(module.body);
           
           for (let connection of connections) {
@@ -495,7 +551,7 @@ function mouseReleased() {
               };
               let constraint = Matter.Constraint.create(options);
               Matter.World.add(world, constraint);
-              draggedModule.type.attached = true;
+              draggedModule.attached = true;
               Matter.Body.setAngle(draggedModule.body, connection.angle);
             }
           }
@@ -503,7 +559,7 @@ function mouseReleased() {
       }
     }
     // set dragged module speed to 0 
-    if (draggedModule.type.attached) {
+    if (draggedModule.attached) {
       Matter.Body.setSpeed(draggedModule.body, 0);
       Matter.Body.setAngularSpeed(draggedModule.body, 0);
     }
@@ -532,7 +588,7 @@ function shipControls() {
 
   // controls for boosters
   for (let module of moduleArray) {
-    if (module.type.attached) {
+    if (module.attached) {
 
       let dx = module.body.position.x - shipBody.position.x;
       let dy = module.body.position.y - shipBody.position.y;
@@ -553,7 +609,7 @@ function shipControls() {
       // A
       if (keyIsDown(65)) {
         Matter.Body.setAngularVelocity(module.body, module.body.angularVelocity - TORQUE);
-        if (localX * localY > 0) {
+        if (localX * localY > 10) {
           module.boost();
         }
         
@@ -570,7 +626,7 @@ function shipControls() {
       // D
       if (keyIsDown(68)) {
         Matter.Body.setAngularVelocity(module.body, module.body.angularVelocity + TORQUE);
-        if (localX * localY < 0) {
+        if (localX * localY < -10) {
           module.boost();
         }
       }
