@@ -5,6 +5,9 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
+//
+let energy = 100;
+let maxEnergy = 100;
 
 // Matter.js variables
 let engine;
@@ -111,8 +114,11 @@ class Booster extends Module {
 let moduleArray = [];
 let particleArray = [];
 
+let engineSound;
+
 function preload() {
   backgroundImage = loadImage("assets/background.png"),
+  engineSound = loadSound('/assets/sounds/engine.mp3');
   moduleImages = {
     booster: loadImage("assets/modules/booster.png"),
     cargo: loadImage("assets/modules/cargo.png"),
@@ -315,11 +321,19 @@ function draw() {
     shipControls();
     moduleDragging();
     drawEarthIndicator();
+    displayInfo();
     // spawnCargo();
   } 
   else {
     displayStartScreen();
   }
+}
+
+function displayInfo() {
+  push();
+  translate(shipBody.position.x-width/2, shipBody.position.y - height/2);
+  text(`Velocity: ${Math.round(shipBody.speed*60)}px/s \nEnergy: ${Math.round(energy)}/${Math.round(maxEnergy)}`, 0, 0);
+  pop();
 }
 
 function spawnCargo() {
@@ -383,6 +397,7 @@ function drawEarthIndicator() {
 function mousePressed() {
   if (!started) {
     started = true;
+    textAlign(LEFT, TOP);
   }
 
   for (let module of moduleArray) {
@@ -568,6 +583,7 @@ function mouseReleased() {
 }
 
 function shipControls() {
+  let engineActive = false;
   // controls for heart module
   // W
   if (keyIsDown(87)) {
@@ -602,6 +618,7 @@ function shipControls() {
       if (keyIsDown(87)) {
         if (cos(module.body.angle - shipBody.angle) > cos(PI / 4)) {
           module.boost();
+          engineActive = true;
         }
           
           
@@ -611,6 +628,7 @@ function shipControls() {
         Matter.Body.setAngularVelocity(module.body, module.body.angularVelocity - TORQUE);
         if (localX * localY > 10) {
           module.boost();
+          engineActive = true;
         }
         
         
@@ -619,6 +637,7 @@ function shipControls() {
       if (keyIsDown(83)) {
         if (cos(module.body.angle - shipBody.angle) < -cos(PI / 4)) {
           module.boost();
+          engineActive = true;
         }
           
           
@@ -628,8 +647,15 @@ function shipControls() {
         Matter.Body.setAngularVelocity(module.body, module.body.angularVelocity + TORQUE);
         if (localX * localY < -10) {
           module.boost();
+          engineActive = true;
         }
       }
     }
+  }
+  if (engineActive) {
+    engineSound.play();
+  }
+  else {
+    engineSound.stop();
   }
 }
