@@ -259,44 +259,7 @@ function setup() {
 
   // example test modules
   moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
-  moduleArray.push(new Booster(1, 10, moduleImages.booster, 3));
 
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
-  moduleArray.push(new Module(5, 10, moduleImages.hub));
   moduleArray.push(new Module(5, 10, moduleImages.hub));
 
   moduleArray.push(new Module(2, 10, moduleImages.cargo));
@@ -322,17 +285,176 @@ function draw() {
     moduleDragging();
     drawEarthIndicator();
     displayInfo();
-    // spawnCargo();
+    spawnCargo();
+    handlePlanetCollisions();
   } 
   else {
     displayStartScreen();
   }
 }
 
+
+function handlePlanetCollisions() {
+  for (let module of moduleArray) {
+    if (module.attached) {
+      // function to check if module is collided with planet
+      function checkCollisionWithPlanet(planetBody, planetName) {
+        let dx = module.body.position.x - planetBody.position.x;
+        let dy = module.body.position.y - planetBody.position.y;
+        let distance = Math.sqrt(dx*dx + dy*dy);
+      
+        if (distance < planetBody.circleRadius + MODULE_SIZE / 2 + MODULE_SIZE) {
+          // collision has been done
+          if (module.type === moduleImages.cargo) {
+            let newType;
+            let thrust;
+            let moduleClass;
+      
+            switch (planetName) {
+              case "moon":
+                newType = moduleImages.landing_booster;
+                thrust = 2;
+                moduleClass = "booster";
+                break;
+              case "jupiter":
+                newType = moduleImages.booster;
+                thrust = 3;
+                moduleClass = "booster";
+                break;
+              case "venus":
+                newType = moduleImages.eco_booster;
+                thrust = 2;
+                moduleClass = "booster";
+                break;
+              case "neptune":
+                newType = moduleImages.hub_booster;
+                thrust = 3;
+                moduleClass = "booster";
+                break;
+              case "saturn":
+                newType = moduleImages.super_booster;
+                thrust = 5;
+                moduleClass = "booster";
+                break;
+              case "mercury":
+                newType = moduleImages.solar_panel;
+                thrust = 0;
+                moduleClass = "module";
+                break;
+              case "mars":
+                newType = moduleImages.hub;
+                thrust = 0;
+                moduleClass = "module";
+                break;
+              case "uranus":
+                newType = moduleImages.power_hub;
+                thrust = 0;
+                moduleClass = "module";
+                break;
+              case "pluto":
+                newType = moduleImages.landing_gear;
+                thrust = 0;
+                moduleClass = "module";
+                break;
+            }
+      
+            // get constraints attached to the module
+            let constraints = Matter.Composite.allConstraints(world).filter(function(constraint) {
+              return (constraint.bodyA === module.body || constraint.bodyB === module.body);
+            });
+      
+            // Store the connected bodies and connection points
+            let connectedBodies = [];
+            for (let i = 0; i < constraints.length; i++) {
+              let constraint = constraints[i];
+              let connectedBody;
+              if (constraint.bodyA === module.body) {
+                connectedBody = constraint.bodyB;
+              }
+              else {
+                connectedBody = constraint.bodyA;
+              }
+              let connectionPoint;
+              if (constraint.bodyA === module.body) {
+                connectionPoint = constraint.pointB;
+              }
+              else {
+                connectionPoint = constraint.pointA;
+              }
+      
+              connectedBodies.push({
+                body: connectedBody,
+                point: connectionPoint,
+                angle: module.body.angle,
+              });
+      
+              // Remove the constraint
+              Matter.World.remove(world, constraint);
+            }
+      
+            // Remove the old module
+            Matter.World.remove(world, module.body);
+            moduleArray.splice(moduleArray.indexOf(module), 1);
+      
+            // Create the new module
+            let newModule;
+            if (moduleClass === "booster") {
+              newModule = new Booster(0, 0, newType, thrust);
+            } 
+            else {
+              newModule = new Module(0, 0, newType);
+            }
+      
+            // Set the position, angle, and attach
+            Matter.Body.setPosition(newModule.body, module.body.position);
+            Matter.Body.setAngle(newModule.body, module.body.angle);
+            newModule.attached = true;
+      
+            moduleArray.push(newModule);
+      
+            // Reattach the new module to connected bodies
+            for (let j = 0; j < connectedBodies.length; j++) {
+              let connection = connectedBodies[j];
+              let options = {
+                bodyA: connection.body,
+                bodyB: newModule.body,
+                pointA: connection.point,
+                pointB: {
+                  x: 0,
+                  y: 0,
+                },
+                length: 0,
+                stiffness: 0,
+                damping: 0,
+              };
+              let constraint = Matter.Constraint.create(options);
+              Matter.World.add(world, constraint);
+            }
+          }
+        }
+      }
+
+      // Check collisions with all planets
+      checkCollisionWithPlanet(moonBody, "moon");
+      checkCollisionWithPlanet(jupiterBody, "jupiter");
+      checkCollisionWithPlanet(venusBody, "venus");
+      checkCollisionWithPlanet(neptuneBody, "neptune");
+      checkCollisionWithPlanet(saturnBody, "saturn");
+      checkCollisionWithPlanet(mercuryBody, "mercury");
+      checkCollisionWithPlanet(marsBody, "mars");
+      checkCollisionWithPlanet(uranusBody, "uranus");
+      checkCollisionWithPlanet(plutoBody, "pluto");
+    }
+  }
+}
+  
+
+
 function displayInfo() {
+
   push();
   translate(shipBody.position.x-width/2, shipBody.position.y - height/2);
-  text(`Velocity: ${Math.round(shipBody.speed*60)}px/s \nEnergy: ${Math.round(energy)}/${Math.round(maxEnergy)}`, 0, 0);
+  text(`Velocity: ${Math.round(shipBody.speed*60)}px/s \nEnergy: ${Math.round(energy)}/${Math.round(maxEnergy)}\nFPS: ${Math.round(frameRate())}`, 0, 0);
   pop();
 }
 
@@ -341,7 +463,7 @@ function spawnCargo() {
   for (module of moduleArray) {
   }
   if (totalCargo < 8) {
-    if (frameCount%180 === 0) {
+    if (frameCount%160 === 0) {
       moduleArray.push(new Module(random(0,16), random(0,16), moduleImages.cargo));
     }
   }
@@ -401,8 +523,32 @@ function mousePressed() {
   }
 
   for (let module of moduleArray) {
-    if (module.containsPoint(mouseX - (width/2 - shipBody.position.x), mouseY - (height/2 - shipBody.position.y))) {
+    if (
+      module.containsPoint(
+        mouseX - (width / 2 - shipBody.position.x),
+        mouseY - (height / 2 - shipBody.position.y)
+      )
+    ) {
       draggedModule = module;
+
+      // if attached, detatch
+      if (draggedModule.attached) {
+        // remove connected constraints
+        let constraintsToRemove = Matter.Composite.allConstraints(world).filter(
+          (constraint) => {
+            return (
+              constraint.bodyA === draggedModule.body ||
+              constraint.bodyB === draggedModule.body
+            );
+          }
+        );
+
+        for (let constraint of constraintsToRemove) {
+          Matter.World.remove(world, constraint);
+        }
+
+        draggedModule.attached = false;
+      }
     }
   }
 }
@@ -441,34 +587,52 @@ function getModuleConnections(body) {
   ];
 }
 
+function isModuleAtPosition(x, y, ignoredModule) {
+  // check if module
+  for (let module of moduleArray) {
+    if (module.body !== ignoredModule && module.attached) {
+      if (Matter.Bounds.contains(module.body.bounds, { x: x, y: y })) {
+        return true;
+      }
+    }
+  }
+  // check if heart
+  if (Matter.Bounds.contains(shipBody.bounds, { x: x, y: y })) {
+    return true;
+  }
+  // if none
+  return false;
+}
+
 function moduleDragging() {
   if (draggedModule && !draggedModule.attached) {
     // no collision with other modules
     draggedModule.body.collisionFilter.category = 0;
-    
+
     // drag module to mouse position
     Matter.Body.setPosition(draggedModule.body, {
-      x: mouseX - (width/2 - shipBody.position.x),
-      y: mouseY - (height/2 - shipBody.position.y)
+      x: mouseX - (width / 2 - shipBody.position.x),
+      y: mouseY - (height / 2 - shipBody.position.y),
     });
 
     // set variables for checking closest module
     let closestDist = Infinity;
     let closestModule = null;
     let closestSide = null;
-
+    let canAttach = false;
 
     // Check heart module connections
     let heartConnections = getModuleConnections(shipBody);
     for (let connection of heartConnections) {
       let xDist = draggedModule.body.position.x - connection.x;
       let yDist = draggedModule.body.position.y - connection.y;
-      let distance = Math.sqrt(xDist*xDist + yDist*yDist);
-      
-      if (distance < closestDist) {
+      let distance = Math.sqrt(xDist * xDist + yDist * yDist);
+
+      if (distance < closestDist && !isModuleAtPosition(connection.x, connection.y, draggedModule.body)) {
         closestDist = distance;
         closestModule = shipBody;
         closestSide = connection;
+        canAttach = true;
       }
     }
 
@@ -476,26 +640,27 @@ function moduleDragging() {
     for (let module of moduleArray) {
       if (module.body !== draggedModule.body && module.attached) {
         let connections = getModuleConnections(module.body);
-        
+
         for (let connection of connections) {
           let xDist = draggedModule.body.position.x - connection.x;
           let yDist = draggedModule.body.position.y - connection.y;
           let distance = Math.sqrt(xDist * xDist + yDist * yDist);
-          
-          if (distance < closestDist) {
+
+          if (distance < closestDist && !isModuleAtPosition(connection.x, connection.y, draggedModule.body)) {
             closestDist = distance;
             closestModule = module.body;
             closestSide = connection;
+            canAttach = true;
           }
         }
       }
     }
 
-    // Snap to closest side if close enough
-    if (closestDist < MODULE_SIZE/2) {
+    // Snap to closest side if close enough and no module is in the way
+    if (closestDist < MODULE_SIZE / 2 && canAttach) {
       Matter.Body.setPosition(draggedModule.body, {
         x: closestSide.x,
-        y: closestSide.y
+        y: closestSide.y,
       });
       Matter.Body.setAngle(draggedModule.body, closestSide.angle);
     }
@@ -507,7 +672,7 @@ function mouseReleased() {
     // module can now interact with other modules
     draggedModule.body.collisionFilter.category = 1;
 
-    // check if point is close 
+    // check if point is close
     function isCloseTo(x1, y1, x2, y2) {
       return abs(x1 - x2) < MODULE_SIZE/2 && abs(y1 - y2) < MODULE_SIZE/2;
     }
@@ -515,21 +680,21 @@ function mouseReleased() {
     // check heart module connections
     let heartConnections = getModuleConnections(shipBody);
     for (let connection of heartConnections) {
-      if (isCloseTo(draggedModule.body.position.x, draggedModule.body.position.y, connection.x, connection.y)) {
+      if (isCloseTo(draggedModule.body.position.x,draggedModule.body.position.y,connection.x,connection.y) && !isModuleAtPosition(connection.x, connection.y, draggedModule.body)) {
         let options = {
           bodyA: shipBody,
           bodyB: draggedModule.body,
           pointA: {
             x: connection.x - shipBody.position.x,
-            y: connection.y - shipBody.position.y
+            y: connection.y - shipBody.position.y,
           },
           pointB: {
             x: 0,
-            y: 0
+            y: 0,
           },
           length: 0,
           stiffness: 0,
-          damping: 0
+          damping: 0,
         };
         let constraint = Matter.Constraint.create(options);
         Matter.World.add(world, constraint);
@@ -543,22 +708,22 @@ function mouseReleased() {
       for (let module of moduleArray) {
         if (module.attached && module.body !== draggedModule.body) {
           let connections = getModuleConnections(module.body);
-          
+
           for (let connection of connections) {
-            if (isCloseTo(draggedModule.body.position.x, draggedModule.body.position.y, connection.x, connection.y)) {
+            if (isCloseTo(draggedModule.body.position.x, draggedModule.body.position.y, connection.x, connection.y) && !isModuleAtPosition(connection.x, connection.y, draggedModule.body)) {
               draggedModule.body.velocity.x = shipBody.velocity.x;
               draggedModule.body.velocity.y = shipBody.velocity.y;
-              
+
               let options = {
                 bodyA: module.body,
                 bodyB: draggedModule.body,
                 pointA: {
                   x: connection.x - module.body.position.x,
-                  y: connection.y - module.body.position.y
+                  y: connection.y - module.body.position.y,
                 },
                 pointB: {
                   x: 0,
-                  y: 0
+                  y: 0,
                 },
                 length: 0,
                 stiffness: 0,
@@ -573,7 +738,7 @@ function mouseReleased() {
         }
       }
     }
-    // set dragged module speed to 0 
+    // set dragged module speed to 0
     if (draggedModule.attached) {
       Matter.Body.setSpeed(draggedModule.body, 0);
       Matter.Body.setAngularSpeed(draggedModule.body, 0);
@@ -653,9 +818,6 @@ function shipControls() {
     }
   }
   if (engineActive) {
-    engineSound.play();
-  }
-  else {
-    engineSound.stop();
+    // engineSound.play();
   }
 }
