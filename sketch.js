@@ -233,28 +233,34 @@ function setup() {
   Composite = Matter.Composite,
   Constraint = Matter.Constraint,
 
+  // moon distance 250km = 1px
+  // other distance 2500km = 1px
+  // size 25km = 1px
+
+  // earth to sun: 58884 px
+
   // hardcode all planets
-  shipBody = Matter.Bodies.rectangle(width / 2, height / 2, MODULE_SIZE, MODULE_SIZE, {frictionAir: 0.0});
+  shipBody = Matter.Bodies.rectangle(0, 0, MODULE_SIZE, MODULE_SIZE, {frictionAir: 0.0});
   Matter.World.add(world, shipBody);
-  earthBody = Matter.Bodies.circle(width / 2, height / 2 - 200, 300, {isStatic: true});
+  earthBody = Matter.Bodies.circle(0, 0, 255, {isStatic: true});
   Matter.World.add(world, earthBody);
-  moonBody = Matter.Bodies.circle(0, 0, 250, {isStatic: true});
+  moonBody = Matter.Bodies.circle(0, 1538, 69, {isStatic: true});
   Matter.World.add(world, moonBody);
-  mercuryBody = Matter.Bodies.circle(0, 500, 150, {isStatic: true});
+  mercuryBody = Matter.Bodies.circle(-30969, 0, 98, {isStatic: true});
   Matter.World.add(world, mercuryBody);
-  venusBody = Matter.Bodies.circle(0, 750, 150, {isStatic: true});
+  venusBody = Matter.Bodies.circle(-15796, 0, 242, {isStatic: true});
   Matter.World.add(world, venusBody);
-  marsBody = Matter.Bodies.circle(0, 1000, 150, {isStatic: true});
+  marsBody = Matter.Bodies.circle(39240, 0, 135, {isStatic: true});
   Matter.World.add(world, marsBody);
-  jupiterBody = Matter.Bodies.circle(0, 1250, 150, {isStatic: true});
+  jupiterBody = Matter.Bodies.circle(245480, 0, 2796, {isStatic: true});
   Matter.World.add(world, jupiterBody);
-  saturnBody = Matter.Bodies.circle(0, 1500, 150, {isStatic: true});
+  saturnBody = Matter.Bodies.circle(516716, 0, 2410, {isStatic: true});
   Matter.World.add(world, saturnBody);
-  uranusBody = Matter.Bodies.circle(0, 1750, 150, {isStatic: true});
+  uranusBody = Matter.Bodies.circle(1110516, 0, 1014, {isStatic: true});
   Matter.World.add(world, uranusBody);
-  neptuneBody = Matter.Bodies.circle(0, 2000, 150, {isStatic: true});
+  neptuneBody = Matter.Bodies.circle(1729636, 2000, 984, {isStatic: true});
   Matter.World.add(world, neptuneBody);
-  plutoBody = Matter.Bodies.circle(0, 2250, 150, {isStatic: true});
+  plutoBody = Matter.Bodies.circle(2303668, 2250, 47, {isStatic: true});
   Matter.World.add(world, plutoBody);
 
   // example test modules
@@ -311,56 +317,56 @@ function handlePlanetCollisions() {
             let moduleClass;
       
             switch (planetName) {
-              case "moon":
-                newType = moduleImages.landing_booster;
-                thrust = 2;
-                moduleClass = "booster";
-                break;
-              case "jupiter":
-                newType = moduleImages.booster;
-                thrust = 3;
-                moduleClass = "booster";
-                break;
-              case "venus":
-                newType = moduleImages.eco_booster;
-                thrust = 2;
-                moduleClass = "booster";
-                break;
-              case "neptune":
-                newType = moduleImages.hub_booster;
-                thrust = 3;
-                moduleClass = "booster";
-                break;
-              case "saturn":
-                newType = moduleImages.super_booster;
-                thrust = 5;
-                moduleClass = "booster";
-                break;
-              case "mercury":
-                newType = moduleImages.solar_panel;
-                thrust = 0;
-                moduleClass = "module";
-                break;
-              case "mars":
-                newType = moduleImages.hub;
-                thrust = 0;
-                moduleClass = "module";
-                break;
-              case "uranus":
-                newType = moduleImages.power_hub;
-                thrust = 0;
-                moduleClass = "module";
-                break;
-              case "pluto":
-                newType = moduleImages.landing_gear;
-                thrust = 0;
-                moduleClass = "module";
-                break;
+            case "moon":
+              newType = moduleImages.landing_booster;
+              thrust = 2;
+              moduleClass = "booster";
+              break;
+            case "jupiter":
+              newType = moduleImages.booster;
+              thrust = 3;
+              moduleClass = "booster";
+              break;
+            case "venus":
+              newType = moduleImages.eco_booster;
+              thrust = 2;
+              moduleClass = "booster";
+              break;
+            case "neptune":
+              newType = moduleImages.hub_booster;
+              thrust = 3;
+              moduleClass = "booster";
+              break;
+            case "saturn":
+              newType = moduleImages.super_booster;
+              thrust = 5;
+              moduleClass = "booster";
+              break;
+            case "mercury":
+              newType = moduleImages.solar_panel;
+              thrust = 0;
+              moduleClass = "module";
+              break;
+            case "mars":
+              newType = moduleImages.hub;
+              thrust = 0;
+              moduleClass = "module";
+              break;
+            case "uranus":
+              newType = moduleImages.power_hub;
+              thrust = 0;
+              moduleClass = "module";
+              break;
+            case "pluto":
+              newType = moduleImages.landing_gear;
+              thrust = 0;
+              moduleClass = "module";
+              break;
             }
       
             // get constraints attached to the module
             let constraints = Matter.Composite.allConstraints(world).filter(function(constraint) {
-              return (constraint.bodyA === module.body || constraint.bodyB === module.body);
+              return constraint.bodyA === module.body || constraint.bodyB === module.body;
             });
       
             // Store the connected bodies and connection points
@@ -470,47 +476,58 @@ function spawnCargo() {
 }
 
 function drawEarthIndicator() {
+  function drawIndicator(planetBody, planetName) {
+    // distance to planet
+    const dx = planetBody.position.x - shipBody.position.x;
+    const dy = planetBody.position.y - shipBody.position.y;
+    const distance = Math.sqrt(dx*dx + dy*dy);
 
-  // distance to earth
-  const dx = earthBody.position.x - shipBody.position.x;
-  const dy = earthBody.position.y - shipBody.position.y;
-  const distance = Math.sqrt(dx*dx + dy*dy);
+    // indicator position
+    const angleToPlanet = atan2(dy, dx);
+    const maxIndicatorRadius = 200;
+    const indicatorX = maxIndicatorRadius*cos(angleToPlanet);
+    const indicatorY = maxIndicatorRadius*sin(angleToPlanet);
 
-  // indicator position
-  const angleToEarth = atan2(dy, dx);
-  const maxIndicatorRadius = 200;
-  const indicatorX = maxIndicatorRadius*cos(angleToEarth);
-  const indicatorY = maxIndicatorRadius*sin(angleToEarth);
+    // indicator size
+    const minSize = 50;
+    const maxSize = 200;
+    const maxDistance = 20000;
+    const indicatorSize = map(distance, 0, maxDistance, maxSize, minSize);
+    const constraintedSize = constrain(indicatorSize, minSize, maxSize);
 
-  // indicator size
-  const minSize = 50;
-  const maxSize = 200;
-  const maxDistance = 20000;
-  const indicatorSize = map(distance, 0, maxDistance, maxSize, minSize);
-  const constraintedSize = constrain(indicatorSize, minSize, maxSize);
+    // background of cross
 
-  // background of cross
+    push();
+    translate(shipBody.position.x, shipBody.position.y);
+    noStroke();
+    fill(200, 100);
+    ellipse(indicatorX, indicatorY, constraintedSize, constraintedSize);
 
-  push();
-  translate(shipBody.position.x, shipBody.position.y);
-  noStroke();
-  fill(200, 100);
-  ellipse(indicatorX, indicatorY, constraintedSize, constraintedSize);
+    stroke(0, 150);
+    strokeWeight(constraintedSize/10);
+    noFill();
+    ellipse(indicatorX, indicatorY, constraintedSize*0.8, constraintedSize*0.8);
 
-  stroke(0, 150);
-  strokeWeight(constraintedSize/10);
-  noFill();
-  ellipse(indicatorX, indicatorY, constraintedSize*0.8, constraintedSize*0.8);
-
-  const crossSize = constraintedSize*0.8;
-  // cross
-  line(
-    indicatorX - crossSize/2, indicatorY, indicatorX + crossSize/2, indicatorY
-  );
-  line(
-    indicatorX, indicatorY - crossSize/2, indicatorX, indicatorY + crossSize/2
-  );
-  pop();
+    const crossSize = constraintedSize*0.8;
+    // cross
+    line(
+      indicatorX - crossSize/2, indicatorY, indicatorX + crossSize/2, indicatorY
+    );
+    line(
+      indicatorX, indicatorY - crossSize/2, indicatorX, indicatorY + crossSize/2
+    );
+    pop();
+  }
+  drawIndicator(moonBody, "moon");
+  drawIndicator(earthBody, "earth");
+  drawIndicator(jupiterBody, "jupiter");
+  drawIndicator(venusBody, "venus");
+  drawIndicator(neptuneBody, "neptune");
+  drawIndicator(saturnBody, "saturn");
+  drawIndicator(mercuryBody, "mercury");
+  drawIndicator(marsBody, "mars");
+  drawIndicator(uranusBody, "uranus");
+  drawIndicator(plutoBody, "pluto");
 }
 
 
