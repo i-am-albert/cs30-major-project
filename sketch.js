@@ -135,7 +135,7 @@ let engineSound;
 
 function preload() {
   backgroundImage = loadImage("assets/background.png"),
-  engineSound = loadSound("assets/sounds/engine.mp3"),
+  engineSound = loadSound("https://i-am-albert.github.io/cs30-major-project/assets/sounds/engine.mp3"),
   moduleImages = {
     booster: loadImage("assets/modules/booster.png"),
     cargo: loadImage("assets/modules/cargo.png"),
