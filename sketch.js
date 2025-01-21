@@ -122,7 +122,7 @@ class Booster extends Module {
         Matter.Body.applyForce(this.body, this.body.position, { x: dx, y: dy });
         particleArray.push(new Particle(this.body.position.x, this.body.position.y, square, color(random(255, 255), random(0, 127), 0), random(10, 15), 0, -dx*5000, -dy*5000, 255, this.body.angle));
 
-        energy -= this.powerUsage;
+        energy -= this.powerUsage/60;
       }
     }
   }
@@ -135,7 +135,7 @@ let engineSound;
 
 function preload() {
   backgroundImage = loadImage("assets/background.png"),
-  engineSound = loadSound('assets/sounds/engine.mp3');
+  engineSound = loadSound("assets/sounds/engine.mp3"),
   moduleImages = {
     booster: loadImage("assets/modules/booster.png"),
     cargo: loadImage("assets/modules/cargo.png"),
@@ -380,13 +380,13 @@ function updateEnergy() {
   // heart ship's power (1000)
   totalMaxEnergy += moduleImages.heart_hub.powerStorage;
 
-
+  maxEnergy = totalMaxEnergy;
   // regeneration
   energy += totalPowerRegen/60;
 
   // recharge in sphere of influence
   if (isNearPlanet()) {
-    energy = totalMaxEnergy;
+    energy = maxEnergy;
   }
 
   // energy is between 0 and maxEnergy
