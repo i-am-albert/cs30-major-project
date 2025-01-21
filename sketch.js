@@ -6,6 +6,9 @@
 // - Using matter.js library
 // - Recreating such a lost game
 // - 2 game modes
+//
+// Great thanks to Alador for recreating glap.io assets (planets and moon used):
+// https://gitlab.com/siralador/glap/-/tree/production/game_assets
 
 // energy variables
 let energy = 1000;
@@ -136,8 +139,8 @@ let particleArray = [];
 let engineSound;
 
 function preload() {
-  backgroundImage = loadImage("assets/background.png"),
   engineSound = loadSound("https://i-am-albert.github.io/cs30-major-project/assets/sounds/engine.mp3"),
+  backgroundImage = loadImage("assets/background.png"),
   moduleImages = {
     booster: loadImage("assets/modules/booster.png"),
     cargo: loadImage("assets/modules/cargo.png"),
@@ -339,12 +342,12 @@ function setup() {
 
   moduleImages.landing_gear.powerStorage = 200;
 
-  // sound
+  textAlign(LEFT, TOP);
+
+  // sound setup
   engineSound.play();
   engineSound.loop();
   engineSound.amp(0);
-
-  textAlign(LEFT, TOP);
 }
 
 
@@ -720,6 +723,7 @@ function drawPlanetIndicators() {
 
 
 function mousePressed() {
+
   if (state === "menu") {
     // normal button
     if (
@@ -1285,7 +1289,7 @@ function shipControls() {
 
   // sound system
   if (engineActive) {
-    engineSound.amp(0.05);
+    engineSound.amp(0.1);
   }
   else {
     engineSound.amp(0);
