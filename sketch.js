@@ -1,11 +1,13 @@
-// Glap.io recreated
+// Glap.io Recreation
 // Albert Auer
-// Date
+// 1/22/2025
 //
 // Extra for Experts:
-// - describe what you did to take this project "above and beyond"
+// - Using matter.js library
+// - Recreating such a lost game
+// - 2 game modes
 
-//
+// energy variables
 let energy = 1000;
 let maxEnergy = 1000;
 
@@ -21,7 +23,7 @@ const MODULE_SIZE = 64;
 const FORCE = 0.001;
 const TORQUE = 0.001;
 const THRUST_MULTIPLIER = 2;
-
+const GRAVITY_CONSTANT = 0.0005;
 
 // image variables
 let moduleImages;
@@ -201,10 +203,7 @@ function displayStartScreen() {
 
   textSize(24);
   text("In sandbox, middle click\nto duplicate modules", width/2 + 250, height*3/4 + 80);
-
 }
-
-
 
 function drawPlanet(body, planetImage) {
   push();
@@ -219,7 +218,6 @@ function drawPlanet(body, planetImage) {
   image(planetImage, -body.circleRadius, -body.circleRadius, body.circleRadius*2, body.circleRadius*2);
   pop();
 }
-
 
 function displayModules() {
   // draw heart module
@@ -268,7 +266,6 @@ function displayParticles() {
   pop();
 }
 
-
 function setup() {
   // basic setup
   createCanvas(windowWidth, windowHeight);
@@ -314,7 +311,6 @@ function setup() {
   Matter.World.add(world, plutoBody);
 
   // hardcode all power variables
-
   moduleImages.heart_hub.powerStorage = 1000;
 
   moduleImages.cargo.powerStorage = 300;
@@ -342,7 +338,6 @@ function setup() {
   moduleImages.power_hub.powerStorage = 900;
 
   moduleImages.landing_gear.powerStorage = 200;
-  
 
   // sound
   engineSound.play();
@@ -391,8 +386,8 @@ function updateEnergy() {
 
   // heart ship's power (1000)
   totalMaxEnergy += moduleImages.heart_hub.powerStorage;
-
   maxEnergy = totalMaxEnergy;
+
   // regeneration
   energy += totalPowerRegen/60;
 
@@ -425,8 +420,6 @@ function isNearPlanet() {
 
 
 function applyGravity() {
-  const GRAVITY_CONSTANT = 0.0005;
-
   const bodies = [shipBody, ...moduleArray.map(module => module.body)];
   const planets = [earthBody, moonBody, mercuryBody, venusBody, marsBody, jupiterBody, saturnBody, uranusBody, neptuneBody, plutoBody];
   // each module gets affected
@@ -665,7 +658,6 @@ function spawnCargo() {
   }
 }
 
-
 function drawPlanetIndicators() {
   const maxIndicatorRadius = 200;
   const maxSize = 200;
@@ -729,7 +721,7 @@ function drawPlanetIndicators() {
 
 function mousePressed() {
   if (state === "menu") {
-    // normal
+    // normal button
     if (
       mouseX > width/2 - 100 &&
       mouseX < width/2 + 100 &&
@@ -739,7 +731,7 @@ function mousePressed() {
       state = "normal";
     }
 
-    // sandbox
+    // sandbox button
     if (
       mouseX > width/2 - 100 &&
       mouseX < width/2 + 100 &&
@@ -747,6 +739,7 @@ function mousePressed() {
       mouseY < height*3/4 + 80 + 30
     ) {
       state = "sandbox";
+      // adding sandbox modules
       moduleArray.push(new Booster(0, 10, moduleImages.booster, 3));
       moduleArray.push(new Module(1, 10, moduleImages.cargo));
       moduleArray.push(new Booster(2, 10, moduleImages.eco_booster, 2));
@@ -1026,7 +1019,6 @@ function moduleDragging() {
 
     // set variables for checking closest module
     let closestDist = Infinity;
-    let closestModule = null;
     let closestSide = null;
     let canAttach = false;
 
@@ -1037,10 +1029,7 @@ function moduleDragging() {
       let yDist = draggedModule.body.position.y - connection.y;
       let distance = Math.sqrt(xDist*xDist + yDist*yDist);
 
-      if (
-        distance < closestDist &&
-        !isModuleAtPosition(connection.x, connection.y, draggedModule.body)
-      ) {
+      if (distance < closestDist && !isModuleAtPosition(connection.x, connection.y, draggedModule.body)) {
         closestDist = distance;
         closestModule = shipBody;
         closestSide = connection;
@@ -1079,8 +1068,6 @@ function moduleDragging() {
   }
   checkModuleRotations();
 }
-
-
 
 function mouseReleased() {
   if (draggedModule) {
@@ -1188,6 +1175,7 @@ function checkModuleRotations() {
 }
 
 function keyPressed() {
+  // go to spawn
   if (key === ' ' && (state === "normal" || state === "sandbox")) {
     resetShip();
   }
@@ -1293,6 +1281,8 @@ function shipControls() {
       }
     }
   }
+
+  // sound system
   if (engineActive) {
     engineSound.amp(0.05);
   }
