@@ -674,8 +674,8 @@ function drawPlanetIndicators() {
     const indicatorX = maxIndicatorRadius*Math.cos(angleToPlanet);
     const indicatorY = maxIndicatorRadius*Math.sin(angleToPlanet);
 
-    const indicatorSize = 50 + (150*Math.exp(-0.001*distance));
-    const alpha = 64 + (96*Math.exp(-0.001*distance));
+    const indicatorSize = 50 + 150*Math.exp(-0.001*distance);
+    const alpha = 64 + 96*Math.exp(-0.001*distance);
 
     push();
     translate(shipBody.position.x + indicatorX, shipBody.position.y + indicatorY);
@@ -965,31 +965,32 @@ function canAttachToSide(module, side) {
   // hub booster, 2 connections
 
   if (module.type === moduleImages.hub_booster) {
-      let constraint = null;
-      let constraints = Matter.Composite.allConstraints(world);
-      for (let c of constraints) {
-        if ((c.bodyA === module.body || c.bodyB === module.body) && (c.bodyA !== c.bodyB)) {
-          constraint = c;
-          break;
-        }
+    let constraint = null;
+    let constraints = Matter.Composite.allConstraints(world);
+    for (let c of constraints) {
+      if ((c.bodyA === module.body || c.bodyB === module.body) && c.bodyA !== c.bodyB) {
+        constraint = c;
+        break;
       }
-      if (constraint) {
-        let relativePosition;
-        if (constraint.bodyA === module.body) {
-            relativePosition = {
-              x: constraint.pointA.x,
-              y: constraint.pointA.y
-            };
-          } else {
-            relativePosition = {
-              x: constraint.pointB.x,
-              y: constraint.pointB.y
-            };
-        }
-        if (relativePosition.y < 0 && side === "top") {
-            return false
-        }
+    }
+    if (constraint) {
+      let relativePosition;
+      if (constraint.bodyA === module.body) {
+        relativePosition = {
+          x: constraint.pointA.x,
+          y: constraint.pointA.y
+        };
+      } 
+      else {
+        relativePosition = {
+          x: constraint.pointB.x,
+          y: constraint.pointB.y
+        };
       }
+      if (relativePosition.y < 0 && side === "top") {
+        return false;
+      }
+    }
     return true;
   }
 
@@ -1160,7 +1161,7 @@ function checkModuleRotations() {
       // Calculate the angle difference between the module and the ship
       let angleDifference = module.body.angle - shipBody.angle - module.initialAngle;
 
-      angleDifference = ((angleDifference % (2*Math.PI)) + (2*Math.PI)) % (2*Math.PI);
+      angleDifference = (angleDifference % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
       if (angleDifference > Math.PI) {
         angleDifference -= 2*Math.PI;
       }
@@ -1211,9 +1212,9 @@ function shipControls() {
   if (keyIsDown(87)) {
     
     if (energy > 0){
-        Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
-        engineActive = true;
-        energy -= 0.1;
+      Matter.Body.applyForce(shipBody, shipBody.position, {x: FORCE*Math.cos(shipBody.angle - HALF_PI), y: FORCE*Math.sin(shipBody.angle - HALF_PI)});
+      engineActive = true;
+      energy -= 0.1;
     }
   }
   // A
@@ -1225,9 +1226,9 @@ function shipControls() {
   if (keyIsDown(83)) {
     
     if (energy > 0){
-        Matter.Body.applyForce(shipBody, shipBody.position, {x: -FORCE*Math.cos(shipBody.angle - PI/2), y: -FORCE*Math.sin(shipBody.angle - PI/2)});
-        engineActive = true;
-        energy -= 0.1;
+      Matter.Body.applyForce(shipBody, shipBody.position, {x: -FORCE*Math.cos(shipBody.angle - PI/2), y: -FORCE*Math.sin(shipBody.angle - PI/2)});
+      engineActive = true;
+      energy -= 0.1;
     }
   }
   // D
